@@ -17,11 +17,14 @@ A single-page, self-contained HTML web app that turns daily homework and study h
   - 🧮 **Math drills** – Quick arithmetic practice.
   - ✈️ **Aviation knowledge quiz** – Fun facts about aircraft, tied to the "captain" theme.
   - 🔁 **Mistake reinforcement** – Revisits previously wrong answers, accumulated over time (not limited to the current day).
+- **💭 Reflection prompts** – After finishing any mini-game, a short open-ended "think about it" question pops up (e.g. "What do these words have in common?", "How does this connect to something you learned before?"). The goal isn't quiz accuracy — it's building the habit of summarizing, connecting old and new knowledge, and asking "why."
+- **📝 Reflection journal** – Every reflection the child writes is saved and viewable from the 📝 button in the top bar, so progress in thinking (not just scores) is visible over time.
+- **⚙️ Custom question banks** – Each family can replace any of the built-in question banks with their own content (their child's textbook, word list, books, etc.) by pasting/uploading a JSON file via the ⚙️ button. See [`QUESTION_BANK_TEMPLATE.md`](QUESTION_BANK_TEMPLATE.md) for the format — it also explains how to ask an AI assistant to generate a custom bank, and how to write good reflection prompts. Any category left out of the custom JSON falls back to the default bank.
 
 ## Tech notes
 
 - Single `index.html` file — no build step, no backend.
-- All progress is stored locally in the browser (`localStorage`), so each device/browser keeps its own progress.
+- All progress, custom question banks, and reflection journal entries are stored locally in the browser (`localStorage`), so each device/browser keeps its own data.
 - Hosted via GitHub Pages for easy access from any device's browser (e.g. add to home screen on iPhone Safari for an app-like experience).
 
 ## Updating

@@ -178,7 +178,11 @@
 <div class="wrap">
   <div class="topbar">
     <h1>🐾 小诺狗狗学习屋</h1>
-    <div class="pill">🏅 勋章 <b id="medalN">0</b> 枚</div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="pill">🏅 勋章 <b id="medalN">0</b> 枚</div>
+      <button class="pill" onclick="openJournal()" title="复盘小本">📝</button>
+      <button class="pill" onclick="openSettings()" title="自定义题库">⚙️</button>
+    </div>
   </div>
 
   <div class="home">
@@ -427,6 +431,42 @@
   <div class="btnRow"><button class="b-main" onclick="finishTimerEarly()">做完啦 ✅</button></div>
 </div></div>
 
+<!-- 复盘想一想层 -->
+<div class="layer" id="reflectL"><div class="lwrap">
+  <div class="lhead"><h3>💭 想一想</h3><button class="quit" onclick="skipReflect()">下次再说</button></div>
+  <div class="qcard" style="text-align:left;">
+    <div class="bkPrompt" id="rfPrompt"></div>
+    <div class="bkHint">写一两句就好，没有标准答案～ 爸爸会在「复盘小本」里看到你的想法。</div>
+    <textarea id="rfArea" class="bkTa" rows="4" placeholder="说说你的想法…"></textarea>
+  </div>
+  <div class="btnRow">
+    <button class="b-sub" onclick="skipReflect()">下次再说</button>
+    <button class="b-main" onclick="saveReflect()">记下我的想法 ✅</button>
+  </div>
+</div></div>
+
+<!-- 复盘小本层 -->
+<div class="layer" id="journalL"><div class="lwrap">
+  <div class="lhead"><h3>📝 复盘小本</h3><button class="quit" onclick="quitGame()">退出</button></div>
+  <div id="journalList"></div>
+</div></div>
+
+<!-- 自定义题库层 -->
+<div class="layer" id="settingsL"><div class="lwrap">
+  <div class="lhead"><h3>⚙️ 自定义题库</h3><button class="quit" onclick="quitGame()">退出</button></div>
+  <div class="qcard" style="text-align:left;">
+    <div class="bkPrompt" style="font-size:15px;line-height:1.7;">每个孩子学的内容不一样～ 可以上传一份"自定义题库"JSON，替换默认的单词/语文/古诗/航空/句子题库（没填的类别继续用默认的）。</div>
+    <div class="bkHint">格式说明见仓库里的 <b>QUESTION_BANK_TEMPLATE.md</b>——可以让AI根据孩子的课本、单词表、图书生成。每类题最好都带上"为什么/你觉得/和以前学的有什么关系"这样的思考提示，不只是选择题。</div>
+    <div id="bankStatus" style="margin:12px 0;font-size:13px;color:#8a6c42;"></div>
+    <input type="file" id="bankFile" accept="application/json" onchange="loadBankFile(event)" style="margin-bottom:10px;font-size:13px;">
+    <textarea id="bankText" class="bkTa" rows="6" placeholder="或把JSON内容粘贴在这里..."></textarea>
+  </div>
+  <div class="btnRow">
+    <button class="b-sub" onclick="resetCustomBanks()">恢复默认题库</button>
+    <button class="b-main" onclick="saveCustomBanks()">保存并应用</button>
+  </div>
+</div></div>
+
 <div id="pop"><div class="card"><div class="em" id="pEm">🎉</div><h3 id="pT"></h3><p id="pP"></p>
   <button onclick="closePop()">好的！</button></div></div>
 <div id="confetti"></div>
@@ -457,6 +497,7 @@ S.medals = S.medals || [];
 S.tasks = S.tasks || [];
 S.books = S.books || [];
 S.subjectLog = S.subjectLog || {};
+S.reflections = S.reflections || [];
 const save = () => localStorage.setItem('xiaonuoDog', JSON.stringify(S));
 
 /* ================= 作业批改记录 =================
@@ -665,8 +706,11 @@ function startTask(i){
   else if (t.type==='reinforce') startReinforce();
   else startTimer(t);
 }
+let lastGameType = null;
+let reflectType = null;
 function completeTask(acc){
   const t = S.tasks[curIdx];
+  lastGameType = t.type;
   t.done = true; t.acc = acc; save(); renderTasks();
   closeLayers();
   const pts = (acc!=null && acc>=90) ? 2 : 1;
@@ -677,7 +721,7 @@ function completeTask(acc){
 }
 
 /* ================= 单词库 ================= */
-const WORDS = [
+let WORDS = [
   ['plane','飞机','/pleɪn/'],['runway','跑道','/ˈrʌnweɪ/'],['pilot','飞行员','/ˈpaɪlət/'],
   ['airport','机场','/ˈeəpɔːt/'],['wing','机翼','/wɪŋ/'],['engine','发动机','/ˈendʒɪn/'],
   ['tower','塔台','/ˈtaʊə/'],['captain','机长','/ˈkæptɪn/'],['takeoff','起飞','/ˈteɪkɒf/'],
@@ -801,7 +845,7 @@ function padIn(k){
 }
 
 /* ================= 飞机小航校 ================= */
-const AIRQ = [
+let AIRQ = [
   {ph:'🧰 起飞前', q:'起飞前，机长围着飞机走一整圈，是在干什么？',
    o:['检查飞机外面有没有问题','锻炼身体','和飞机拍照留念'], a:0,
    ex:'这叫"绕机检查"，真正的A320检查单第一项就是它！轮胎、机翼、发动机都要亲眼看一遍。',
@@ -950,7 +994,7 @@ function nextAir(){
 }
 
 /* ================= 语文知识点闯关 ================= */
-const CHINESEQ = [
+let CHINESEQ = [
   {q:'"美丽"的近义词是？', o:['漂亮','丑陋','高大','聪明'], a:0, ex:'"美丽"和"漂亮"意思相近，都是形容好看、好。'},
   {q:'"高兴"的反义词是？', o:['开心','难过','活泼','安静'], a:1, ex:'"高兴"是开心的意思，反义词就是"难过"。'},
   {q:'"一___鱼"，应该填什么量词？', o:['条','只','个','张'], a:0, ex:'鱼一般用"条"作量词，比如"一条鱼""一条小河"。'},
@@ -1106,7 +1150,7 @@ function nextReinforce(){
 }
 
 /* ================= 古诗填空 ================= */
-const POEMQ = [
+let POEMQ = [
   {title:'《绝句》· 杜甫', line:'____日江山丽，春风花草香。', ans:'迟', py:'chí'},
   {title:'《绝句》· 杜甫', line:'迟日江山丽，春风花____香。', ans:'草', py:'cǎo'},
   {title:'《绝句》· 杜甫', line:'泥融飞____子，沙暖睡鸳鸯。', ans:'燕', py:'yàn'},
@@ -1348,7 +1392,7 @@ function pickPoem(btn, val){
 }
 
 /* ================= 英语句子排序 ================= */
-const ORDERQ = [
+let ORDERQ = [
   {cn:'我有一支红色的笔。', words:['I','have','a','red','pen'], punc:'.'},
   {cn:'这是我的朋友。', words:['This','is','my','friend'], punc:'.'},
   {cn:'我喜欢苹果。', words:['I','like','apples'], punc:'.'},
@@ -1364,6 +1408,68 @@ const ORDERQ = [
   {cn:'很高兴认识你。', words:['Nice','to','meet','you'], punc:'.'},
   {cn:'这是一个小球。', words:['This','is','a','small','ball'], punc:'.'},
 ];
+
+/* =====================================================
+   自定义题库 + 复盘提示
+   家长可在「⚙️ 自定义题库」里上传JSON，覆盖下面任意几类题库
+   （字段名：words/air/chinese/poem/order/reinforce/reflect）。
+   格式说明见仓库里的 QUESTION_BANK_TEMPLATE.md
+   ===================================================== */
+const REFLECT_PROMPTS = {
+  words: [
+    '这些单词里，哪一个你觉得最容易和别的单词搞混？为什么？',
+    '挑一个新学的单词，试着用它编一句话～',
+    '有没有哪个单词的发音或拼写，让你想到了别的单词？说说你的发现～',
+  ],
+  math: [
+    '这些题目里，哪一种类型(加/减/乘/除)你算得最快？为什么？',
+    '有没有哪一题一开始算错了？后来你是怎么发现、怎么改对的？',
+    '今天的题和你以前做过的题，有什么地方很像？',
+  ],
+  air: [
+    '刚才的题目里，哪一个"为什么"你觉得最有意思？试着用自己的话讲给爸爸听～',
+    '你能从刚才学的飞行知识里，找到一个咱们生活中类似的例子吗？',
+    '如果让你给同学讲刚才学到的一个知识点，你会怎么讲？',
+  ],
+  chinese: [
+    '这些题目里，有没有哪个知识点是你以前学过、今天又用到的？',
+    '挑一道你印象最深的题，说说它考的是什么"套路"？下次遇到类似题你会怎么做？',
+    '有没有哪道题你一开始想错了？后来是怎么发现并纠正的？',
+  ],
+  poem: [
+    '这首诗讲的是什么季节、什么心情？你还记得有没有别的诗也是写这个的？',
+    '诗里有没有哪个字，你觉得用得特别好？为什么诗人要选这个字？',
+    '试着把这首诗的意思，用你自己的话讲一遍～',
+  ],
+  order: [
+    '排错的句子里，你发现了什么规律？英语句子的顺序和中文有什么不一样？',
+    '挑一句你排对的句子，换一个词，编一句新句子～',
+  ],
+  reinforce: [
+    '这次和上次错的原因，有没有什么共同点？是同一类问题吗？',
+    '如果再遇到这种题，你会先做什么、提醒自己注意什么？',
+  ],
+};
+function applyCustomBanks(){
+  try{
+    const raw = localStorage.getItem('xiaonuoCustomBanks');
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (Array.isArray(data.words) && data.words.length) WORDS = data.words;
+    if (Array.isArray(data.air) && data.air.length) AIRQ = data.air;
+    if (Array.isArray(data.chinese) && data.chinese.length) CHINESEQ = data.chinese;
+    if (Array.isArray(data.poem) && data.poem.length) POEMQ = data.poem;
+    if (Array.isArray(data.order) && data.order.length) ORDERQ = data.order;
+    if (Array.isArray(data.reinforce) && data.reinforce.length) REINFORCEQ = data.reinforce;
+    if (data.reflect && typeof data.reflect === 'object'){
+      Object.keys(data.reflect).forEach(k=>{
+        if (Array.isArray(data.reflect[k]) && data.reflect[k].length) REFLECT_PROMPTS[k] = data.reflect[k];
+      });
+    }
+  }catch(e){ console.warn('自定义题库加载失败', e); }
+}
+applyCustomBanks();
+
 function startOrder(){
   game = { qs: shuffle(ORDERQ).slice(0,8), i:0, ok:0, res:[], picked:[], pool:[], locked:false };
   $('orderL').classList.add('show');
@@ -1513,7 +1619,13 @@ function abortTimer(){ if(tInt){clearInterval(tInt);tInt=null;} closeLayers(); }
 function quitGame(){ closeLayers(); }
 function closeLayers(){ document.querySelectorAll('.layer').forEach(l=>l.classList.remove('show')); }
 function showPop(em,t,p){ $('pEm').textContent=em; $('pT').textContent=t; $('pP').textContent=p; $('pop').style.display='flex'; }
-function closePop(){ $('pop').style.display='none'; }
+function closePop(){
+  $('pop').style.display='none';
+  if (lastGameType && REFLECT_PROMPTS[lastGameType]){
+    const type = lastGameType; lastGameType = null;
+    showReflect(type);
+  }
+}
 function confetti(){
   const ems=['🎉','⭐','🦴','🐾','💛','🌟'];
   for(let i=0;i<28;i++){
@@ -1533,6 +1645,81 @@ function beep(notes){
       o.start(ctx.currentTime+i*.16);o.stop(ctx.currentTime+i*.16+.16);
     });
   }catch(e){}
+}
+
+/* ================= 复盘想一想 ================= */
+function showReflect(type){
+  reflectType = type;
+  const pool = REFLECT_PROMPTS[type] || [];
+  $('rfPrompt').textContent = pool.length ? pool[Math.floor(Math.random()*pool.length)] : '今天学到的内容里，有什么是你以前就知道的？又有什么是新发现？';
+  $('rfArea').value = '';
+  $('reflectL').classList.add('show');
+}
+function skipReflect(){ closeLayers(); reflectType = null; }
+function saveReflect(){
+  const text = $('rfArea').value.trim();
+  if (text){
+    S.reflections.push({date:todayKey(), type:reflectType, prompt:$('rfPrompt').textContent, text});
+    save();
+  }
+  closeLayers();
+  reflectType = null;
+}
+
+/* ================= 复盘小本 ================= */
+const GAME_LABEL = {words:'🔤 单词', math:'📐 口算', air:'✈️ 航校', chinese:'📖 语文', poem:'📜 古诗', order:'🔤 句子排序', reinforce:'🎯 错题强化'};
+function openJournal(){
+  $('journalList').innerHTML = S.reflections.length
+    ? S.reflections.slice().reverse().map(r=>`<div class="bkItem" style="align-items:flex-start;flex-direction:column;">
+        <div class="t"><b>${GAME_LABEL[r.type]||r.type}</b> · ${r.date}<small style="display:block;margin-top:4px;">${(r.prompt||'').replace(/</g,'&lt;')}</small></div>
+        <div style="margin-top:6px;font-size:14px;color:#3d2e15;">${(r.text||'').replace(/</g,'&lt;')}</div>
+      </div>`).join('')
+    : '<span class="noMedal">还没有想法记录，完成一个「屋里练」游戏后，试试「想一想」吧！</span>';
+  $('journalL').classList.add('show');
+}
+
+/* ================= 自定义题库设置 ================= */
+const BANK_NAMES = {words:'单词', air:'航空', chinese:'语文', poem:'古诗', order:'句子排序', reinforce:'错题强化', reflect:'复盘提示'};
+function openSettings(){
+  renderBankStatus();
+  $('bankText').value = '';
+  $('settingsL').classList.add('show');
+}
+function renderBankStatus(){
+  const raw = localStorage.getItem('xiaonuoCustomBanks');
+  if (!raw){ $('bankStatus').textContent = '当前：使用默认题库'; return; }
+  try{
+    const data = JSON.parse(raw);
+    const used = Object.keys(BANK_NAMES).filter(k=> data[k] && (Array.isArray(data[k]) ? data[k].length : Object.keys(data[k]).length));
+    $('bankStatus').textContent = used.length
+      ? `当前：已加载自定义题库（${used.map(k=>BANK_NAMES[k]).join('、')}），其余使用默认题库`
+      : '当前：使用默认题库';
+  }catch(e){ $('bankStatus').textContent = '当前：使用默认题库'; }
+}
+function loadBankFile(ev){
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => { $('bankText').value = e.target.result; };
+  reader.readAsText(file);
+}
+function saveCustomBanks(){
+  const text = $('bankText').value.trim();
+  if (!text){ showPop('🤔','还没有内容','请先选择文件，或把JSON内容粘贴进框里～'); return; }
+  let data;
+  try{ data = JSON.parse(text); }
+  catch(e){ showPop('⚠️','格式不对','JSON格式好像有问题，检查一下逗号、引号有没有写对～'); return; }
+  localStorage.setItem('xiaonuoCustomBanks', JSON.stringify(data));
+  closeLayers();
+  showPop('✅','保存成功','自定义题库已保存，马上刷新页面生效～');
+  setTimeout(()=>location.reload(), 1200);
+}
+function resetCustomBanks(){
+  if (!confirm('确定要恢复默认题库吗？自定义题库会被删除。')) return;
+  localStorage.removeItem('xiaonuoCustomBanks');
+  closeLayers();
+  showPop('✅','已恢复默认','马上刷新页面生效～');
+  setTimeout(()=>location.reload(), 1200);
 }
 
 renderPet(); renderTasks(); renderBadges(); renderBooks(); renderRainbow(); save();
