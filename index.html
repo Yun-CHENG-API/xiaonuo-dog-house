@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>小诺狗狗学习屋 🐕</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:linear-gradient(180deg,#fdf3e3 0%,#f7e3c3 100%); min-height:100vh; color:#5a4326; padding-bottom:30px; }
+  .wrap { max-width:560px; margin:0 auto; padding:14px; }
+
+  .topbar { display:flex; justify-content:space-between; align-items:center; padding:6px 4px 12px; }
+  .topbar h1 { font-size:20px; }
+  .pill { background:#fff; border-radius:20px; padding:5px 12px; font-size:13px; box-shadow:0 2px 6px rgba(120,80,20,.12); }
+
+  /* ===== 狗狗的家 ===== */
+  .home { position:relative; height:300px; border-radius:22px; overflow:hidden;
+    background:linear-gradient(180deg,#9fd4ff 0%,#cdeaff 45%,#e8f7ff 60%);
+    box-shadow:0 8px 22px rgba(120,80,20,.18); }
+  .scene { position:absolute; inset:0; width:100%; height:100%; }
+  .cl { position:absolute; width:64px; height:21px; background:#fff; border-radius:40px; opacity:.95; left:-80px; animation:drift linear infinite; z-index:2; }
+  .cl::before{ content:""; position:absolute; width:28px; height:28px; background:#fff; border-radius:50%; top:-13px; left:11px; }
+  .cl::after { content:""; position:absolute; width:20px; height:20px; background:#fff; border-radius:50%; top:-9px; left:34px; }
+  @keyframes drift { from{transform:translateX(0)} to{transform:translateX(740px)} }
+  .sunG { animation:spin 36s linear infinite; transform-origin:478px 46px; }
+  @keyframes spin { to{ transform:rotate(360deg);} }
+  .swayF { animation:sway 3.2s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 100%; }
+  .swayF.s2 { animation-delay:1.1s; } .swayF.s3 { animation-delay:2s; }
+  @keyframes sway { 0%,100%{transform:rotate(-4deg)} 50%{transform:rotate(5deg)} }
+  .bird { animation:birdgo 17s linear infinite; }
+  .bird.b2 { animation-delay:7s; }
+  @keyframes birdgo { from{transform:translate(-60px,0)} 50%{transform:translate(300px,-26px)} to{transform:translate(640px,6px)} }
+  .bfly { position:absolute; font-size:19px; z-index:6; animation:bflyGo 13s ease-in-out infinite; left:8%; top:46%; }
+  @keyframes bflyGo {
+    0%{transform:translate(0,0) rotate(-12deg)} 20%{transform:translate(90px,-44px) rotate(10deg)}
+    45%{transform:translate(220px,-12px) rotate(-10deg)} 70%{transform:translate(320px,-52px) rotate(12deg)}
+    100%{transform:translate(0,0) rotate(-12deg)} }
+
+  #dogBox { position:absolute; left:50%; bottom:34px; transform-origin:50% 100%; transition:transform .8s ease; z-index:5; }
+  #dogBox.happy { animation:jump .55s ease 2; }
+  @keyframes jump { 0%,100%{margin-bottom:0} 50%{margin-bottom:26px} }
+  #dogSvg { display:block; }
+  .tailG { animation:wag 1s ease-in-out infinite; transform-origin:18% 80%; }
+  @keyframes wag { 0%,100%{transform:rotate(0)} 50%{transform:rotate(16deg)} }
+
+  .homeMsg { position:absolute; top:12px; left:0; width:100%; text-align:center; font-size:15px;
+    font-weight:bold; color:#2b5a8a; z-index:6; }
+  .stageTag { position:absolute; top:38px; left:0; width:100%; text-align:center; font-size:12px; color:#46729c; z-index:6; }
+
+  .heart { position:absolute; font-size:22px; animation:floatUp 1.4s ease-out forwards; z-index:8; }
+  @keyframes floatUp { from{opacity:1; transform:translateY(0) scale(.7);} to{opacity:0; transform:translateY(-90px) scale(1.3);} }
+  .foodFly { position:absolute; font-size:26px; z-index:8; transition:all .7s cubic-bezier(.4,-0.2,.7,1.2); }
+
+  /* ===== 成长条 ===== */
+  .panel { background:#fff; border-radius:18px; padding:16px; margin-top:14px; box-shadow:0 3px 10px rgba(120,80,20,.10); }
+  .panel h2 { font-size:15px; margin-bottom:10px; display:flex; justify-content:space-between; color:#7a5c33; }
+  .growWrap { background:#f3e7d2; border-radius:12px; height:24px; overflow:hidden; position:relative; }
+  .growBar { height:100%; width:0%; border-radius:12px; transition:width .6s ease;
+    background:linear-gradient(90deg,#ffc35e,#ff9d3a); }
+  .growTxt { position:absolute; inset:0; text-align:center; font-size:12px; line-height:24px; font-weight:bold; color:#7a4d12; }
+  .growTip { font-size:12px; color:#b08c5a; margin-top:8px; }
+
+  /* ===== 学习彩虹 ===== */
+  .rainbowRow { display:flex; align-items:center; gap:8px; margin:10px 0; }
+  .rbLabel { width:46px; font-weight:bold; color:#7a4d12; font-size:14px; flex-shrink:0; }
+  .rainbowBar { flex:1; height:18px; border-radius:9px; position:relative; overflow:hidden;
+    background:linear-gradient(90deg,#ff595e,#ff924c,#ffca3a,#8ac926,#1982c4,#6a4c93,#52a675); }
+  .rbGray { position:absolute; top:0; right:0; height:100%; background:#e3ddd2; border-radius:0 9px 9px 0; transition:width .6s ease; }
+  .rbPct { width:46px; text-align:right; font-size:13px; color:#7a4d12; font-weight:bold; flex-shrink:0; }
+  .rbEmpty { font-size:12px; color:#cdbfa8; }
+  .rainbowTip { font-size:12px; color:#b08c5a; margin-top:6px; }
+
+  /* ===== 任务 ===== */
+  .task { display:flex; align-items:center; gap:10px; background:#fdf6ea; border-radius:14px; padding:12px; margin-bottom:9px; }
+  .task.done { opacity:.55; }
+  .task .icon { font-size:22px; }
+  .task .name { flex:1; font-size:15px; }
+  .task .name small { display:block; font-size:12px; color:#b08c5a; margin-top:2px; }
+  button { border:none; border-radius:12px; font-family:inherit; font-weight:bold; cursor:pointer; transition:transform .12s; }
+  button:active { transform:scale(.95); }
+  .go { font-size:13px; padding:8px 14px; background:#ff9d3a; color:#fff; }
+  .go.fin { background:#7dbb6a; }
+  .del { font-size:13px; padding:8px 10px; background:#f3e2cf; color:#c0784a; margin-left:6px; }
+  .addRow { display:flex; gap:8px; margin-top:4px; }
+  .addRow select { flex:1; border:none; border-radius:12px; padding:12px 28px 12px 10px; font-size:15px; font-family:inherit;
+    background:#f3e7d2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a4326' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 10px center;
+    color:#5a4326; -webkit-appearance:none; appearance:none; }
+  .addRow select.min { flex:0 0 104px; }
+  .addRow button { flex:0 0 64px; background:#ff9d3a; color:#fff; font-size:15px; padding:12px 0; }
+
+  /* ===== 勋章 ===== */
+  .badges { display:flex; flex-wrap:wrap; gap:8px; }
+  .medal { background:linear-gradient(135deg,#ffe9b8,#ffd478); border-radius:12px; padding:8px 12px; font-size:13px; color:#7a4d12; }
+  .noMedal { font-size:13px; color:#c4a87a; }
+
+  /* ===== 全屏游戏层 ===== */
+  .layer { position:fixed; inset:0; background:linear-gradient(180deg,#fdf3e3,#f7e3c3); z-index:40; display:none; overflow-y:auto; }
+  .layer.show { display:block; }
+  .lwrap { max-width:560px; margin:0 auto; padding:18px 16px 30px; }
+  .lhead { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .lhead h3 { font-size:18px; }
+  .quit { background:#e8d8bd; color:#7a5c33; font-size:13px; padding:8px 14px; }
+  .dots { display:flex; gap:5px; margin-bottom:16px; }
+  .dot { flex:1; height:8px; border-radius:4px; background:#eadbc0; }
+  .dot.ok { background:#7dbb6a; } .dot.bad { background:#e88a7a; } .dot.cur { background:#ffc35e; }
+
+  .qcard { background:#fff; border-radius:20px; padding:30px 20px; text-align:center;
+    box-shadow:0 4px 14px rgba(120,80,20,.12); margin-bottom:16px; }
+  .qword { font-size:42px; font-weight:800; color:#3d2e15; letter-spacing:1px; }
+  .qipa { font-size:19px; color:#8a6c42; margin-top:6px; display:flex; align-items:center; justify-content:center; gap:10px; }
+  .spk { background:#ffe9b8; border-radius:50%; width:38px; height:38px; font-size:18px; padding:0; }
+  .qhint { font-size:13px; color:#b08c5a; margin-top:6px; }
+  .opts { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .opt { background:#fff; border-radius:16px; padding:18px 8px; font-size:19px; color:#5a4326;
+    box-shadow:0 3px 8px rgba(120,80,20,.12); }
+  .opt.right { background:#7dbb6a; color:#fff; }
+  .opt.wrong { background:#e88a7a; color:#fff; }
+
+  .phChip { display:inline-block; background:#e1efff; color:#2b5a8a; font-size:12px; font-weight:bold;
+    border-radius:20px; padding:4px 12px; margin-bottom:10px; }
+  .qair { font-size:20px; font-weight:bold; color:#3d2e15; line-height:1.5; }
+  .opts1 { display:flex; flex-direction:column; gap:10px; }
+  .opts1 .opt { font-size:16px; text-align:left; padding:15px 16px; line-height:1.4; }
+  .exBox { background:#fffbe8; border:2px solid #ffd478; border-radius:16px; padding:16px; margin-top:14px;
+    font-size:14px; color:#6b5128; line-height:1.7; }
+  .exBox .think { margin-top:8px; color:#2b5a8a; font-weight:bold; }
+  .exBox .nextB { width:100%; margin-top:12px; padding:13px 0; font-size:15px; border-radius:12px; }
+  .bkPrompt { font-size:18px; font-weight:bold; color:#3d2e15; line-height:1.5; }
+  .bkHint { font-size:13px; color:#b08c5a; margin:6px 0 12px; line-height:1.6; }
+  .bkIn, .bkTa { width:100%; border:2px solid #eadbc0; border-radius:12px; padding:12px; font-size:16px;
+    font-family:inherit; color:#3d2e15; background:#fffdf8; resize:none; }
+  .bkIn:focus, .bkTa:focus { outline:none; border-color:#ffb55e; }
+  .exp { background:#ffe9b8; color:#7a4d12; font-size:12px; padding:6px 12px; border-radius:10px; }
+  .bkItem { display:flex; align-items:center; gap:10px; background:#fdf6ea; border-radius:12px; padding:10px 12px; margin-bottom:8px; }
+  .bkItem .t { flex:1; font-size:14px; }
+  .bkItem .t small { display:block; font-size:11px; color:#b08c5a; }
+  .bkItem button { background:#e8d8bd; color:#7a5c33; font-size:12px; padding:7px 12px; }
+
+  /* ===== 句子排序 ===== */
+  .ansSlots { display:flex; flex-wrap:wrap; gap:8px; min-height:46px; border-bottom:2px dashed #eadbc0; padding-bottom:12px; margin-bottom:12px; }
+  .wbank { display:flex; flex-wrap:wrap; gap:8px; }
+  .wchip { background:#fff; border-radius:10px; padding:8px 14px; font-size:17px; color:#5a4326; box-shadow:0 2px 8px rgba(120,80,20,.12); }
+  .ansSlots .wchip { background:#ffe9b8; color:#7a4d12; }
+  .wchip.punc { background:transparent; box-shadow:none; padding:8px 2px; font-weight:bold; color:#7a4d12; }
+  .oPh { font-size:13px; color:#c4a87a; }
+  #oCheck:disabled { opacity:.4; }
+  .qmath { font-size:46px; font-weight:800; color:#3d2e15; font-variant-numeric:tabular-nums; }
+  .ansBox { min-height:54px; font-size:38px; font-weight:800; color:#ff9d3a; }
+  .pad { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .pad button { background:#fff; font-size:24px; padding:16px 0; color:#3d2e15; box-shadow:0 3px 8px rgba(120,80,20,.12); border-radius:16px; }
+  .pad .fn { background:#ffe9b8; font-size:17px; }
+  .pad .okk { background:#ff9d3a; color:#fff; }
+
+  .timerBig2 { font-size:64px; font-weight:800; text-align:center; color:#3d2e15; margin:20px 0; font-variant-numeric:tabular-nums; }
+  .sleepDog { text-align:center; font-size:80px; margin:10px 0; animation:breathe 3s ease-in-out infinite; }
+  @keyframes breathe { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+  .btnRow { display:flex; gap:10px; margin-top:18px; }
+  .btnRow button { flex:1; padding:15px 0; font-size:16px; }
+  .b-main { background:#ff9d3a; color:#fff; }
+  .b-sub { background:#e8d8bd; color:#7a5c33; }
+
+  /* ===== 结算/庆祝 ===== */
+  #pop { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(70,45,10,.55); z-index:60; }
+  #pop .card { background:#fff; border-radius:24px; padding:32px 28px; text-align:center; max-width:330px; animation:popIn .4s ease; }
+  @keyframes popIn { 0%{transform:scale(.5)} 70%{transform:scale(1.1)} 100%{transform:scale(1)} }
+  #pop .em { font-size:58px; }
+  #pop h3 { margin:10px 0 6px; font-size:21px; color:#3d2e15; }
+  #pop p { font-size:14px; color:#8a6c42; line-height:1.6; white-space:pre-line; text-align:left; max-height:50vh; overflow-y:auto; }
+  #pop button { margin-top:18px; width:100%; background:#ff9d3a; color:#fff; padding:14px 0; font-size:16px; }
+  #confetti { position:fixed; inset:0; pointer-events:none; z-index:70; }
+  .cf { position:absolute; font-size:24px; animation:fall 2.6s ease-in forwards; }
+  @keyframes fall { from{transform:translateY(-40px) rotate(0)} to{transform:translateY(105vh) rotate(540deg); opacity:.2} }
+  .hint { text-align:center; font-size:12px; color:#c4a87a; margin-top:16px; line-height:1.7; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <h1>🐾 小诺狗狗学习屋</h1>
+    <div class="pill">🏅 勋章 <b id="medalN">0</b> 枚</div>
+  </div>
+
+  <div class="home">
+    <svg class="scene" viewBox="0 0 560 300" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+      <g class="sunG" stroke="#ffd95e" stroke-width="5" stroke-linecap="round">
+        <line x1="478" y1="8" x2="478" y2="20"/><line x1="478" y1="72" x2="478" y2="84"/>
+        <line x1="440" y1="46" x2="452" y2="46"/><line x1="504" y1="46" x2="516" y2="46"/>
+        <line x1="451" y1="19" x2="460" y2="28"/><line x1="496" y1="64" x2="505" y2="73"/>
+        <line x1="505" y1="19" x2="496" y2="28"/><line x1="460" y1="64" x2="451" y2="73"/>
+      </g>
+      <circle cx="478" cy="46" r="24" fill="#ffd95e"/>
+      <g class="bird" fill="none" stroke="#5a7a9a" stroke-width="2.5" stroke-linecap="round">
+        <path d="M20 64 q6 -8 12 0 q6 -8 12 0"/>
+      </g>
+      <g class="bird b2" fill="none" stroke="#5a7a9a" stroke-width="2" stroke-linecap="round">
+        <path d="M0 96 q5 -7 10 0 q5 -7 10 0"/>
+      </g>
+      <path d="M0 196 Q120 152 260 188 Q420 150 560 186 L560 300 L0 300 Z" fill="#b8dc8e"/>
+      <rect x="0" y="208" width="560" height="92" fill="#8cbf5c"/>
+      <path d="M0 212 Q140 198 280 212 T560 210 L560 232 L0 232 Z" fill="#9fce6e"/>
+      <g fill="#ffffff" opacity=".92">
+        <rect x="180" y="180" width="7" height="30" rx="3"/><rect x="226" y="180" width="7" height="30" rx="3"/>
+        <rect x="272" y="180" width="7" height="30" rx="3"/><rect x="318" y="180" width="7" height="30" rx="3"/>
+        <rect x="364" y="180" width="7" height="30" rx="3"/><rect x="410" y="180" width="7" height="30" rx="3"/>
+        <rect x="172" y="186" width="252" height="4" rx="2"/><rect x="172" y="198" width="252" height="4" rx="2"/>
+      </g>
+      <rect x="50" y="116" width="13" height="52" rx="4" fill="#8a5a36"/>
+      <circle cx="56" cy="92" r="32" fill="#5fa84e"/><circle cx="34" cy="110" r="21" fill="#6fb75c"/>
+      <circle cx="80" cy="108" r="20" fill="#6fb75c"/>
+      <circle cx="44" cy="96" r="4" fill="#ff8aa0"/><circle cx="68" cy="84" r="4" fill="#ff8aa0"/><circle cx="74" cy="112" r="4" fill="#ff8aa0"/>
+      <rect x="514" y="138" width="10" height="40" rx="3" fill="#8a5a36"/>
+      <circle cx="519" cy="120" r="24" fill="#5fa84e"/><circle cx="503" cy="134" r="15" fill="#6fb75c"/>
+      <g>
+        <rect x="68" y="200" width="84" height="60" rx="6" fill="#f3d9a8" stroke="#d9b779" stroke-width="2"/>
+        <polygon points="58,204 110,164 162,204" fill="#d8533f"/>
+        <rect x="94" y="226" width="32" height="34" rx="15" fill="#6b4a2c"/>
+        <rect x="98" y="208" width="24" height="9" rx="4.5" fill="#fff" opacity=".9"/>
+      </g>
+      <g id="bowlG">
+        <ellipse cx="470" cy="262" rx="32" ry="12" fill="#d8533f"/>
+        <ellipse cx="470" cy="258" rx="24" ry="7" fill="#b53d2c"/>
+        <rect x="458" y="252" width="14" height="5" rx="2.5" fill="#fff"/>
+        <circle cx="458" cy="254" r="3.4" fill="#fff"/><circle cx="472" cy="254" r="3.4" fill="#fff"/>
+      </g>
+      <g class="swayF"><line x1="208" y1="276" x2="208" y2="258" stroke="#4e8c3c" stroke-width="3"/>
+        <circle cx="204" cy="254" r="4" fill="#ff8aa0"/><circle cx="212" cy="254" r="4" fill="#ff8aa0"/>
+        <circle cx="208" cy="248" r="4" fill="#ff8aa0"/><circle cx="208" cy="254" r="3" fill="#fff"/></g>
+      <g class="swayF s2"><line x1="330" y1="282" x2="330" y2="264" stroke="#4e8c3c" stroke-width="3"/>
+        <circle cx="326" cy="260" r="4" fill="#ffd95e"/><circle cx="334" cy="260" r="4" fill="#ffd95e"/>
+        <circle cx="330" cy="254" r="4" fill="#ffd95e"/><circle cx="330" cy="260" r="3" fill="#fff"/></g>
+      <g class="swayF s3"><line x1="420" y1="278" x2="420" y2="260" stroke="#4e8c3c" stroke-width="3"/>
+        <circle cx="416" cy="256" r="4" fill="#c08aff"/><circle cx="424" cy="256" r="4" fill="#c08aff"/>
+        <circle cx="420" cy="250" r="4" fill="#c08aff"/><circle cx="420" cy="256" r="3" fill="#fff"/></g>
+      <path d="M168 268 q4 -10 8 0 M540 270 q4 -10 8 0 M30 276 q4 -10 8 0" stroke="#6da653" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div class="cl" style="top:26px;animation-duration:40s;"></div>
+    <div class="cl" style="top:60px;animation-duration:56s;animation-delay:9s;transform:scale(.7);"></div>
+    <div class="bfly">🦋</div>
+    <div class="homeMsg" id="homeMsg"></div>
+    <div class="stageTag" id="stageTag"></div>
+    <div id="dogBox"></div>
+  </div>
+
+  <div class="panel">
+    <h2><span id="growName">🐕 成长进度</span><span id="growPts">0/40</span></h2>
+    <div class="growWrap"><div class="growBar" id="growBar"></div><div class="growTxt" id="growTxt"></div></div>
+    <div class="growTip">完成任务 +1分 · 练习正确率≥90% +2分 · 1分=喂1次 · 喂满40分毕业换新狗狗！</div>
+  </div>
+
+  <div class="panel">
+    <h2><span>🌈 学习彩虹</span><span id="rainbowDate"></span></h2>
+    <div id="rainbowWrap"></div>
+    <div class="rainbowTip">每天作业批改后，正确率越高，彩虹就越完整漂亮～</div>
+  </div>
+
+  <div class="panel">
+    <h2><span>📋 今日任务</span><span id="taskN"></span></h2>
+    <div id="tasks"></div>
+    <div class="addRow">
+      <select id="tName">
+        <option value="">选择任务…</option>
+        <optgroup label="🎮 屋里练（自动评分）">
+          <option value="g:words">英语单词复习 🎮</option>
+          <option value="g:math">数学口算闯关 🎮</option>
+          <option value="g:chinese">语文知识点闯关 🎮</option>
+          <option value="g:poem">古诗填空 🎮</option>
+          <option value="g:order">英语句子排序 🎮</option>
+          <option value="g:air">飞机小航校 ✈️</option>
+          <option value="g:book">读书汇报 📚</option>
+          <option value="g:reinforce">错题强化练习 🎯</option>
+        </optgroup>
+        <optgroup label="📐 数学">
+          <option value="t:15">数学订正</option>
+          <option value="t:20">数学作业</option>
+        </optgroup>
+        <optgroup label="📖 语文">
+          <option value="t:20">语文练习卷</option>
+          <option value="t:15">语文阅读</option>
+          <option value="t:25">语文作文（周末）</option>
+        </optgroup>
+        <optgroup label="🔤 英语">
+          <option value="t:10">英语绘本打卡</option>
+          <option value="t:10">英语默写</option>
+          <option value="t:15">英语练习卷</option>
+          <option value="t:15">英语阅读</option>
+          <option value="t:20">英语作文（周末）</option>
+        </optgroup>
+        <optgroup label="🎸 课外">
+          <option value="t:20">吉他练习</option>
+          <option value="t:30">画画</option>
+        </optgroup>
+        <optgroup label="⭐ 其他">
+          <option value="t:15">错题重做</option>
+          <option value="t:15">预习明天功课</option>
+          <option value="t:20">课外阅读</option>
+          <option value="t:20">学校其他作业</option>
+        </optgroup>
+      </select>
+      <button id="addBtn">添加</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2><span>🏅 毕业勋章墙</span></h2>
+    <div class="badges" id="badges"><span class="noMedal">还没有勋章，把第一只柴犬养大吧！</span></div>
+  </div>
+
+  <div class="panel">
+    <h2><span>📚 我的读后感</span><button class="exp" onclick="exportBooks()">导出全部</button></h2>
+    <div id="bookList"><span class="noMedal">读完一本书，来做第一个读书汇报吧！</span></div>
+  </div>
+
+  <div class="hint">纸上作业用「计时任务」专注完成 · 单词和口算直接在屋里闯关<br>做完记得去Claude找助理复盘哦 ✨</div>
+</div>
+
+<!-- 单词游戏层 -->
+<div class="layer" id="wordsL"><div class="lwrap">
+  <div class="lhead"><h3>🔤 英语单词复习</h3><button class="quit" onclick="quitGame()">退出</button></div>
+  <div class="dots" id="wDots"></div>
+  <div class="qcard">
+    <div class="qword" id="wWord"></div>
+    <div class="qipa"><span id="wIpa"></span><button class="spk" id="wSpk" onclick="speakCur()">🔊</button></div>
+    <div class="qhint">选出正确的中文意思</div>
+  </div>
+  <div class="opts" id="wOpts"></div>
+</div></div>
+
+<!-- 口算游戏层 -->
+<div class="layer" id="mathL"><div class="lwrap">
+  <div class="lhead"><h3>📐 数学口算闯关</h3><button class="quit" onclick="quitGame()">退出</button></div>
+  <div class="dots" id="mDots"></div>
+  <div class="qcard"><div class="qmath" id="mQ"></div><div class="ansBox" id="mA">&nbsp;</div></div>
+  <div class="pad" id="mPad"></div>
+</div></div>
+
+<!-- 飞机小航校层 -->
+<div class="layer" id="airL"><div class="lwrap">
+  <div class="lhead"><h3>✈️ 飞机小航校</h3><button class="quit" onclick="quitGame()">退出</button></div>
+  <div class="dots" id="aDots"></div>
+  <div class="qcard">
+    <div class="phChip" id="aPhase"></div>
+    <div class="qair" id="aQ"></div>
+  </div>
+  <div class="opts1" id="aOpts"></div>
+  <div class="exBox" id="aEx" style="display:none;">
+    <div id="aExT"></div>
+    <div class="think" id="aTh"></div>
+    <button class="b-main nextB" onclick="nextAir()">下一题 ▶</button>
+  </div>
+</div></div>
+
+<!-- 语文知识点闯关层 -->
+<div class="layer" id="chineseL"><div class="lwrap">
+  <div class="lhead"><h3>📖 语文知识点闯关</h3><button class="quit" onclick="quitGame()">退出</button></div>
+  <div class="dots" id="cDots"></div>
+  <div class="qcard"><div class="qair" id="cQ"></div></div>
+  <div class="opts1" id="cOpts"></div>
+  <div class="exBox" id="cEx" style="display:none;">
+    <div id="cExT"></div>
+    <button class="b-main nextB" onclick="nextChinese()">下一题 ▶</button>
+  </div>
+</div></div>
+
+<!-- 错题强化练习层 -->
+<div class="layer" id="reinforceL"><div class="lwrap">
+  <div class="lhead"><h3>🎯 错题强化练习</h3><button class="quit" onclick="quitGame()">退出</button></div>
+  <div class="dots" id="rDots"></div>
+  <div class="qcard"><div class="qair" id="rQ"></div></div>
+  <div class="opts1" id="rOpts"></div>
+  <div class="exBox" id="rEx" style="display:none;">
+    <div id="rExT"></div>
+    <button class="b-main nextB" onclick="nextReinforce()">下一题 ▶</button>
+  </div>
+</div></div>
+
+<!-- 古诗填空层 -->
+<div class="layer" id="poemL"><div class="lwrap">
+  <div class="lhead"><h3>📜 古诗填空</h3><button class="quit" onclick="quitGame()">退出</button></div>
+  <div class="dots" id="pDots"></div>
+  <div class="qcard">
+    <div class="phChip" id="pTitle"></div>
+    <div class="qair" id="pLine"></div>
+    <div class="qipa" id="pPy" style="justify-content:center;"></div>
+  </div>
+  <div class="opts" id="pOpts"></div>
+</div></div>
+
+<!-- 英语句子排序层 -->
+<div class="layer" id="orderL"><div class="lwrap">
+  <div class="lhead"><h3>🔤 英语句子排序</h3><button class="quit" onclick="quitGame()">退出</button></div>
+  <div class="dots" id="oDots"></div>
+  <div class="qcard" style="text-align:left;">
+    <div class="qhint" id="oCn" style="margin-bottom:10px;"></div>
+    <div class="ansSlots" id="oAns"></div>
+    <div class="wbank" id="oBank"></div>
+  </div>
+  <div class="exBox" id="oFeedback" style="display:none;"></div>
+  <div class="btnRow">
+    <button class="b-main" id="oCheck" onclick="checkOrder()" disabled>检查 ✅</button>
+    <button class="b-main" id="oNext" onclick="nextOrder()" style="display:none;">下一题 ▶</button>
+  </div>
+</div></div>
+
+<!-- 读书汇报层 -->
+<div class="layer" id="bookL"><div class="lwrap">
+  <div class="lhead"><h3>📚 读书汇报</h3><button class="quit" onclick="quitGame()">退出</button></div>
+  <div class="dots" id="bDots"></div>
+  <div class="qcard" style="text-align:left;">
+    <div class="bkPrompt" id="bPrompt"></div>
+    <div class="bkHint" id="bHint"></div>
+    <input id="bInput" class="bkIn" style="display:none;" maxlength="30" placeholder="写在这里…">
+    <textarea id="bArea" class="bkTa" style="display:none;" rows="5" placeholder="用自己的话写，写错字也没关系～"></textarea>
+  </div>
+  <div class="btnRow">
+    <button class="b-sub" id="bPrev" onclick="bookPrev()">上一步</button>
+    <button class="b-main" id="bNext" onclick="bookNext()">下一步 ▶</button>
+  </div>
+</div></div>
+
+<!-- 计时任务层 -->
+<div class="layer" id="timerL"><div class="lwrap">
+  <div class="lhead"><h3 id="tTitle">⏰ 专注中</h3><button class="quit" onclick="abortTimer()">放弃</button></div>
+  <div class="sleepDog">🐶</div>
+  <div class="timerBig2" id="tClock">00:00</div>
+  <p style="text-align:center;font-size:14px;color:#8a6c42;">狗狗在旁边陪着你，专心做纸上的作业吧！<br>做完后点下面的按钮，记录这次用了多长时间 🦴</p>
+  <div class="btnRow"><button class="b-main" onclick="finishTimerEarly()">做完啦 ✅</button></div>
+</div></div>
+
+<div id="pop"><div class="card"><div class="em" id="pEm">🎉</div><h3 id="pT"></h3><p id="pP"></p>
+  <button onclick="closePop()">好的！</button></div></div>
+<div id="confetti"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const todayKey = () => new Date().toISOString().slice(0,10);
+
+/* ================= 犬种 ================= */
+const BREEDS = [
+  { name:'柴犬',   c1:'#e8973a', c2:'#fff6ea', ear:'#d3792a' },
+  { name:'柯基',   c1:'#f2a64e', c2:'#ffffff', ear:'#dd8a35' },
+  { name:'哈士奇', c1:'#8a9bb0', c2:'#f2f5f9', ear:'#71839a' },
+  { name:'金毛',   c1:'#d9b36a', c2:'#f6ead0', ear:'#c49b4e' },
+  { name:'萨摩耶', c1:'#f3ede2', c2:'#ffffff', ear:'#e2d7c4' },
+  { name:'边牧',   c1:'#4a4a4a', c2:'#f4f4f4', ear:'#333333' },
+  { name:'秋田犬', c1:'#d9a05a', c2:'#fff4e4', ear:'#c2884a' },
+  { name:'法斗',   c1:'#b89071', c2:'#ecdcc9', ear:'#a07a5c' },
+];
+const STAGE_PTS = 40;
+
+/* ================= 存档 ================= */
+let S = JSON.parse(localStorage.getItem('xiaonuoDog') || '{}');
+if (S.day !== todayKey()) { S.day = todayKey(); S.tasks = []; }
+S.pts = S.pts || 0;
+S.breed = S.breed || 0;
+S.medals = S.medals || [];
+S.tasks = S.tasks || [];
+S.books = S.books || [];
+S.subjectLog = S.subjectLog || {};
+const save = () => localStorage.setItem('xiaonuoDog', JSON.stringify(S));
+
+/* ================= 作业批改记录 =================
+   每次"看下今天的作业"批改后，由Claude在这里追加一条记录：
+   {date:'YYYY-MM-DD', subject:'数学'|'语文'|'英语', correct:对题数, total:总题数}
+   页面会自动把这些记录合并进存档，并在"学习彩虹"里显示当天的正确率。
+*/
+const HOMEWORK_LOG = [
+  {date:'2026-06-13', subject:'数学', correct:36, total:41},
+];
+HOMEWORK_LOG.forEach(e=>{
+  S.subjectLog[e.date] = S.subjectLog[e.date] || {};
+  S.subjectLog[e.date][e.subject] = {correct:e.correct, total:e.total};
+});
+function renderRainbow(){
+  const subjects = ['数学','语文','英语'];
+  const today = todayKey();
+  $('rainbowDate').textContent = today;
+  const log = S.subjectLog[today] || {};
+  $('rainbowWrap').innerHTML = subjects.map(subj=>{
+    const d = log[subj];
+    if (!d || !d.total){
+      return `<div class="rainbowRow"><div class="rbLabel">${subj}</div><div class="rainbowBar"><div class="rbGray" style="width:100%"></div></div><div class="rbPct rbEmpty">暂无</div></div>`;
+    }
+    const pct = Math.round(d.correct/d.total*100);
+    return `<div class="rainbowRow"><div class="rbLabel">${subj}</div><div class="rainbowBar"><div class="rbGray" style="width:${100-pct}%"></div></div><div class="rbPct">${pct}%</div></div>`;
+  }).join('');
+}
+
+/* ================= 狗狗绘制 ================= */
+function dogSVG(b, pts){
+  const stage = pts<13 ? 0 : pts<26 ? 1 : 2;
+  const within = stage===0 ? pts/13 : stage===1 ? (pts-13)/13 : Math.min(1,(pts-26)/14);
+  const s = Math.round([92,128,164][stage] + within*22);
+  let body = '';
+  if (stage===0){
+    body = `
+    <circle cx="144" cy="156" r="9" fill="${b.c1}"/>
+    <ellipse cx="100" cy="160" rx="38" ry="27" fill="${b.c1}"/>
+    <ellipse cx="100" cy="167" rx="23" ry="16" fill="${b.c2}"/>
+    <ellipse cx="80" cy="184" rx="11" ry="7" fill="${b.c2}"/>
+    <ellipse cx="120" cy="184" rx="11" ry="7" fill="${b.c2}"/>
+    <path d="M58 56 Q46 16 78 28 Q66 42 72 58 Z" fill="${b.c1}"/>
+    <path d="M142 56 Q154 16 122 28 Q134 42 128 58 Z" fill="${b.c1}"/>
+    <circle cx="100" cy="96" r="56" fill="${b.c1}"/>
+    <ellipse cx="100" cy="114" rx="32" ry="22" fill="${b.c2}"/>
+    <ellipse cx="76" cy="82" rx="12" ry="9" fill="${b.c2}"/>
+    <ellipse cx="124" cy="82" rx="12" ry="9" fill="${b.c2}"/>
+    <circle cx="78" cy="86" r="8" fill="#3a2a18"/><circle cx="81" cy="83" r="2.6" fill="#fff"/>
+    <circle cx="122" cy="86" r="8" fill="#3a2a18"/><circle cx="119" cy="83" r="2.6" fill="#fff"/>
+    <path d="M94 106 Q100 112 106 106 L100 101 Z" fill="#4a3226"/>
+    <path d="M100 112 Q100 118 93 120 M100 112 Q100 118 107 120" stroke="#4a3226" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <ellipse cx="62" cy="104" rx="7" ry="4.5" fill="#f5b8a0" opacity=".75"/>
+    <ellipse cx="138" cy="104" rx="7" ry="4.5" fill="#f5b8a0" opacity=".75"/>
+    <circle cx="100" cy="42" r="6" fill="#d8533f"/>
+    <circle cx="91" cy="38" r="5" fill="#e76b58"/><circle cx="109" cy="38" r="5" fill="#e76b58"/>`;
+  } else if (stage===1){
+    body = `
+    <g class="tailG"><path d="M152 138 Q178 128 172 102 Q186 122 166 146 Z" fill="${b.c1}"/></g>
+    <ellipse cx="100" cy="150" rx="54" ry="40" fill="${b.c1}"/>
+    <ellipse cx="100" cy="158" rx="32" ry="26" fill="${b.c2}"/>
+    <ellipse cx="74" cy="183" rx="13" ry="9" fill="${b.c2}"/>
+    <ellipse cx="126" cy="183" rx="13" ry="9" fill="${b.c2}"/>
+    <polygon points="54,44 72,12 86,44" fill="${b.c1}"/>
+    <polygon points="146,44 128,12 114,44" fill="${b.c1}"/>
+    <polygon points="61,41 72,21 81,41" fill="${b.ear}"/>
+    <polygon points="139,41 128,21 119,41" fill="${b.ear}"/>
+    <circle cx="100" cy="82" r="50" fill="${b.c1}"/>
+    <ellipse cx="100" cy="98" rx="32" ry="24" fill="${b.c2}"/>
+    <ellipse cx="78" cy="70" rx="11" ry="8" fill="${b.c2}"/>
+    <ellipse cx="122" cy="70" rx="11" ry="8" fill="${b.c2}"/>
+    <circle cx="80" cy="74" r="6" fill="#3a2a18"/><circle cx="82" cy="72" r="2" fill="#fff"/>
+    <circle cx="120" cy="74" r="6" fill="#3a2a18"/><circle cx="118" cy="72" r="2" fill="#fff"/>
+    <path d="M93 93 Q100 99 107 93 L100 88 Z" fill="#4a3226"/>
+    <path d="M100 99 Q100 106 92 108 M100 99 Q100 106 108 108" stroke="#4a3226" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <ellipse cx="66" cy="92" rx="7" ry="4.5" fill="#f5b8a0" opacity=".75"/>
+    <ellipse cx="134" cy="92" rx="7" ry="4.5" fill="#f5b8a0" opacity=".75"/>
+    <path d="M62 124 Q100 140 138 124 L138 132 Q100 148 62 132 Z" fill="#d8533f"/>
+    <circle cx="100" cy="140" r="6" fill="#ffd95e"/>`;
+  } else {
+    body = `
+    <g class="tailG"><path d="M150 120 Q186 104 176 70 Q196 96 170 132 Z" fill="${b.c1}"/></g>
+    <ellipse cx="100" cy="138" rx="60" ry="46" fill="${b.c1}"/>
+    <ellipse cx="94" cy="150" rx="32" ry="30" fill="${b.c2}"/>
+    <rect x="60" y="150" width="19" height="42" rx="9" fill="${b.c1}"/>
+    <rect x="121" y="150" width="19" height="42" rx="9" fill="${b.c1}"/>
+    <ellipse cx="70" cy="192" rx="12" ry="7" fill="${b.c2}"/>
+    <ellipse cx="130" cy="192" rx="12" ry="7" fill="${b.c2}"/>
+    <polygon points="58,30 74,2 88,28" fill="${b.c1}"/>
+    <polygon points="142,30 126,2 112,28" fill="${b.c1}"/>
+    <polygon points="64,27 74,10 82,26" fill="${b.ear}"/>
+    <polygon points="136,27 126,10 118,26" fill="${b.ear}"/>
+    <circle cx="100" cy="62" r="44" fill="${b.c1}"/>
+    <ellipse cx="100" cy="78" rx="28" ry="20" fill="${b.c2}"/>
+    <ellipse cx="81" cy="52" rx="10" ry="7" fill="${b.c2}"/>
+    <ellipse cx="119" cy="52" rx="10" ry="7" fill="${b.c2}"/>
+    <circle cx="83" cy="56" r="5.4" fill="#3a2a18"/><circle cx="85" cy="54" r="1.8" fill="#fff"/>
+    <circle cx="117" cy="56" r="5.4" fill="#3a2a18"/><circle cx="115" cy="54" r="1.8" fill="#fff"/>
+    <path d="M94 74 Q100 80 106 74 L100 69 Z" fill="#4a3226"/>
+    <path d="M100 80 Q100 86 93 88 M100 80 Q100 86 107 88" stroke="#4a3226" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <ellipse cx="70" cy="72" rx="6.5" ry="4" fill="#f5b8a0" opacity=".7"/>
+    <ellipse cx="130" cy="72" rx="6.5" ry="4" fill="#f5b8a0" opacity=".7"/>
+    <path d="M56 100 Q100 118 144 100 L144 109 Q100 127 56 109 Z" fill="#d8533f"/>
+    <circle cx="100" cy="118" r="6.5" fill="#ffd95e"/>`;
+  }
+  return `<svg id="dogSvg" width="${s}" height="${s}" viewBox="0 0 200 200" style="margin-left:-${s/2}px;display:block;">${body}</svg>`;
+}
+function stageName(p){ return p<13 ? '幼犬期 🍼' : p<26 ? '成长期 🦴' : '成犬期 💪'; }
+function renderPet(){
+  const b = BREEDS[S.breed % BREEDS.length];
+  const growth = Math.min(1, S.pts/STAGE_PTS);
+  $('dogBox').innerHTML = dogSVG(b, S.pts);
+  $('homeMsg').textContent = `${b.name}：汪！今天也一起加油！`;
+  $('stageTag').textContent = stageName(S.pts);
+  $('growName').textContent = `🐕 ${b.name} · 成长进度`;
+  $('growPts').textContent = `${S.pts}/${STAGE_PTS}`;
+  $('growBar').style.width = (growth*100)+'%';
+  $('growTxt').textContent = S.pts >= STAGE_PTS ? '毕业啦！' : `还差 ${STAGE_PTS-S.pts} 分毕业`;
+  $('medalN').textContent = S.medals.length;
+}
+function renderBadges(){
+  $('badges').innerHTML = S.medals.length
+    ? S.medals.map(m=>`<div class="medal">🏅 ${m.breed} · ${m.date}</div>`).join('')
+    : '<span class="noMedal">还没有勋章，把第一只柴犬养大吧！</span>';
+}
+
+/* ================= 喂食与积分 ================= */
+function feed(pts, msg){
+  let fed = 0;
+  const one = () => {
+    if (fed >= pts){ renderPet(); checkGraduate(msg); return; }
+    fed++; S.pts++; save();
+    const f = document.createElement('div');
+    f.className = 'foodFly'; f.textContent = '🦴';
+    f.style.left = '20%'; f.style.top = '10%';
+    document.querySelector('.home').appendChild(f);
+    requestAnimationFrame(()=>{ f.style.left='78%'; f.style.top='78%'; f.style.opacity='0'; });
+    setTimeout(()=>{ f.remove();
+      $('dogBox').classList.add('happy');
+      const h=document.createElement('div'); h.className='heart'; h.textContent='❤️';
+      h.style.left=(45+Math.random()*14)+'%'; h.style.top='38%';
+      document.querySelector('.home').appendChild(h);
+      setTimeout(()=>h.remove(),1500);
+      setTimeout(()=>$('dogBox').classList.remove('happy'),1200);
+      beep([784]);
+      renderPet();
+      setTimeout(one, 700);
+    }, 750);
+  };
+  one();
+}
+function checkGraduate(msg){
+  if (S.pts >= STAGE_PTS){
+    const b = BREEDS[S.breed % BREEDS.length];
+    S.medals.push({breed:b.name, date:todayKey().slice(5).replace('-','/')});
+    S.breed++; S.pts = 0; save();
+    renderPet(); renderBadges(); confetti();
+    beep([523,659,784,1047]);
+    const nb = BREEDS[S.breed % BREEDS.length];
+    showPop('🎓', `${b.name} 毕业啦！`, `获得「${b.name}勋章」🏅 收进勋章墙！\n新伙伴「${nb.name}」幼犬已到家，继续加油～`);
+  } else if (msg) {
+    showPop(msg.em, msg.t, msg.p);
+  }
+}
+
+/* ================= 任务 ================= */
+function renderTasks(){
+  const done = S.tasks.filter(t=>t.done).length;
+  $('taskN').textContent = S.tasks.length ? `${done}/${S.tasks.length} 完成` : '';
+  const todo = S.tasks.map((t,i)=>({t,i})).filter(x=>!x.t.done);
+  $('tasks').innerHTML = todo.length ? todo.map(({t,i})=>`
+    <div class="task">
+      <div class="icon">${t.type==='timer'?'⏰':t.type==='book'?'📚':'🎮'}</div>
+      <div class="name">${t.name}<small>${t.type==='timer' ? '计时任务 · 记录完成用时' : t.type==='book' ? '读完一本书来汇报 · 奖励2分' : '屋里练 · 自动评分'}</small></div>
+      <button class="go" onclick="startTask(${i})">开始</button>
+      <button class="del" title="删除任务" onclick="delTask(${i})">✕</button>
+    </div>`).join('') : (S.tasks.length ? '<span class="noMedal">今天的任务都完成啦，真棒！🎉</span>' : '');
+}
+$('addBtn').onclick = () => {
+  const v = $('tName').value;
+  if (!v) return;
+  const opt = $('tName').selectedOptions[0];
+  const label = opt.textContent.replace(' 🎮','').replace(' ✈️','').replace(' 📚','');
+  if (v.startsWith('g:')) S.tasks.push({name:label, type:v.slice(2), done:false, acc:null});
+  else S.tasks.push({name:label, type:'timer', done:false, acc:null, usedMin:null});
+  save(); $('tName').value=''; renderTasks();
+};
+function delTask(i){
+  const t = S.tasks[i];
+  if (!confirm(`删除任务「${t.name}」吗？`)) return;
+  S.tasks.splice(i,1);
+  save(); renderTasks();
+}
+let curIdx = -1;
+function startTask(i){
+  if (S.tasks[i].done) return;
+  curIdx = i;
+  const t = S.tasks[i];
+  if (t.type==='words') startWords();
+  else if (t.type==='math') startMath();
+  else if (t.type==='air') startAir();
+  else if (t.type==='book') startBook();
+  else if (t.type==='chinese') startChinese();
+  else if (t.type==='poem') startPoem();
+  else if (t.type==='order') startOrder();
+  else if (t.type==='reinforce') startReinforce();
+  else startTimer(t);
+}
+function completeTask(acc){
+  const t = S.tasks[curIdx];
+  t.done = true; t.acc = acc; save(); renderTasks();
+  closeLayers();
+  const pts = (acc!=null && acc>=90) ? 2 : 1;
+  const praise = acc==null ? (t.usedMin!=null ? `专注完成，用了${t.usedMin}分钟，狗狗为你骄傲！` : '专注完成，狗狗为你骄傲！')
+    : acc>=90 ? `正确率${acc}%，双倍喂食 🦴🦴！`
+    : `正确率${acc}%，喂食+1。错的几题就是新发现，下次消灭它！`;
+  feed(pts, {em:'🦴', t:'任务完成！', p:praise});
+}
+
+/* ================= 单词库 ================= */
+const WORDS = [
+  ['plane','飞机','/pleɪn/'],['runway','跑道','/ˈrʌnweɪ/'],['pilot','飞行员','/ˈpaɪlət/'],
+  ['airport','机场','/ˈeəpɔːt/'],['wing','机翼','/wɪŋ/'],['engine','发动机','/ˈendʒɪn/'],
+  ['tower','塔台','/ˈtaʊə/'],['captain','机长','/ˈkæptɪn/'],['takeoff','起飞','/ˈteɪkɒf/'],
+  ['landing','降落','/ˈlændɪŋ/'],['sky','天空','/skaɪ/'],['cloud','云','/klaʊd/'],
+  ['fast','快的','/fɑːst/'],['high','高的','/haɪ/'],['fly','飞','/flaɪ/'],
+  ['dog','狗','/dɒɡ/'],['cat','猫','/kæt/'],['bird','鸟','/bɜːd/'],
+  ['fish','鱼','/fɪʃ/'],['apple','苹果','/ˈæpl/'],['water','水','/ˈwɔːtə/'],
+  ['milk','牛奶','/mɪlk/'],['rice','米饭','/raɪs/'],['breakfast','早餐','/ˈbrekfəst/'],
+  ['hungry','饿的','/ˈhʌŋɡri/'],['school','学校','/skuːl/'],['book','书','/bʊk/'],
+  ['friend','朋友','/frend/'],['happy','开心的','/ˈhæpi/'],['run','跑','/rʌn/'],
+  ['jump','跳','/dʒʌmp/'],['red','红色','/red/'],['blue','蓝色','/bluː/'],
+  ['sun','太阳','/sʌn/'],['moon','月亮','/muːn/'],['star','星星','/stɑː/'],
+  ['rain','雨','/reɪn/'],['big','大的','/bɪɡ/'],['small','小的','/smɔːl/'],
+  ['family','家人','/ˈfæməli/'],
+];
+function speak(word){
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(word);
+    u.lang = 'en-US'; u.rate = .85;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+let game = null;
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function startWords(){
+  game = { qs: shuffle(WORDS).slice(0,10), i:0, ok:0, lock:false };
+  $('wordsL').classList.add('show');
+  renderWordQ();
+}
+function speakCur(){ if (game && game.cur) speak(game.cur); }
+function renderWordQ(){
+  const [en, zh, ipa] = game.qs[game.i];
+  $('wDots').innerHTML = game.qs.map((_,k)=>`<div class="dot ${k<game.i?(game.res&&game.res[k]?'ok':'bad'):(k===game.i?'cur':'')}"></div>`).join('');
+  game.res = game.res || [];
+  $('wWord').textContent = en;
+  $('wIpa').textContent = ipa || '';
+  game.cur = en;
+  speak(en);
+  const wrong = shuffle(WORDS.filter(w=>w[1]!==zh)).slice(0,3).map(w=>w[1]);
+  const opts = shuffle([zh, ...wrong]);
+  $('wOpts').innerHTML = opts.map(o=>`<button class="opt" onclick="pickWord(this,'${o.replace(/'/g,"\\'")}')">${o}</button>`).join('');
+  game.ans = zh; game.lock = false;
+}
+function pickWord(btn, val){
+  if (game.lock) return; game.lock = true;
+  const right = val === game.ans;
+  if (right){ btn.classList.add('right'); game.ok++; beep([784,988]); }
+  else {
+    btn.classList.add('wrong'); beep([330]);
+    [...document.querySelectorAll('#wOpts .opt')].find(b=>b.textContent===game.ans).classList.add('right');
+  }
+  game.res[game.i] = right;
+  setTimeout(()=>{
+    game.i++;
+    if (game.i >= game.qs.length) completeTask(Math.round(game.ok/game.qs.length*100));
+    else renderWordQ();
+  }, right ? 650 : 1400);
+}
+
+/* ================= 口算 ================= */
+function genQ(){
+  const t = Math.floor(Math.random()*4);
+  let a,b,q,ans;
+  if (t===0){ a=100+Math.floor(Math.random()*800); b=100+Math.floor(Math.random()*(899-(a%900))); ans=a+b; q=`${a} + ${b} =`; }
+  else if (t===1){ a=200+Math.floor(Math.random()*700); b=100+Math.floor(Math.random()*(a-100)); ans=a-b; q=`${a} − ${b} =`; }
+  else if (t===2){ a=12+Math.floor(Math.random()*78); b=2+Math.floor(Math.random()*8); ans=a*b; q=`${a} × ${b} =`; }
+  else { b=2+Math.floor(Math.random()*8); ans=3+Math.floor(Math.random()*9); a=ans*b; q=`${a} ÷ ${b} =`; }
+  return {q, ans};
+}
+function startMath(){
+  game = { qs: Array.from({length:10}, genQ), i:0, ok:0, res:[], input:'' };
+  $('mathL').classList.add('show');
+  $('mPad').innerHTML = [1,2,3,4,5,6,7,8,9].map(n=>`<button onclick="padIn('${n}')">${n}</button>`).join('')
+    + `<button class="fn" onclick="padIn('C')">清除</button><button onclick="padIn('0')">0</button><button class="okk" onclick="padIn('=')">确定</button>`;
+  renderMathQ();
+}
+function renderMathQ(){
+  $('mDots').innerHTML = game.qs.map((_,k)=>`<div class="dot ${k<game.i?(game.res[k]?'ok':'bad'):(k===game.i?'cur':'')}"></div>`).join('');
+  $('mQ').textContent = game.qs[game.i].q;
+  game.input=''; $('mA').innerHTML='&nbsp;';
+}
+function padIn(k){
+  if (k==='C'){ game.input=''; $('mA').innerHTML='&nbsp;'; return; }
+  if (k==='='){
+    if (!game.input) return;
+    const right = parseInt(game.input) === game.qs[game.i].ans;
+    game.res[game.i] = right;
+    if (right){ game.ok++; $('mA').style.color='#7dbb6a'; beep([784,988]); }
+    else { $('mA').style.color='#e88a7a'; $('mA').textContent = game.input+' → '+game.qs[game.i].ans; beep([330]); }
+    setTimeout(()=>{
+      $('mA').style.color='#ff9d3a';
+      game.i++;
+      if (game.i>=game.qs.length) completeTask(Math.round(game.ok/game.qs.length*100));
+      else renderMathQ();
+    }, right?500:1600);
+    return;
+  }
+  if (game.input.length<5){ game.input+=k; $('mA').textContent=game.input; }
+}
+
+/* ================= 飞机小航校 ================= */
+const AIRQ = [
+  {ph:'🧰 起飞前', q:'起飞前，机长围着飞机走一整圈，是在干什么？',
+   o:['检查飞机外面有没有问题','锻炼身体','和飞机拍照留念'], a:0,
+   ex:'这叫"绕机检查"，真正的A320检查单第一项就是它！轮胎、机翼、发动机都要亲眼看一遍。',
+   th:'想一想：为什么坐在驾驶舱里检查仪表还不够？'},
+  {ph:'🧰 起飞前', q:'飞行员明明都会背流程了，为什么还要照着检查单一条条念？',
+   o:['怕漏掉任何一个重要步骤','显得更专业','检查单是装饰品'], a:0,
+   ex:'再厉害的机长也可能有忘事的一天。检查单是航空历史上最伟大的安全发明之一——重要的事不靠记性，靠清单。',
+   th:'想一想：你写作业前能不能也做一张自己的"检查单"？'},
+  {ph:'🧰 起飞前', q:'客机的燃油大部分藏在哪里？',
+   o:['机翼里','驾驶舱地板下','尾巴里'], a:0,
+   ex:'对！机翼又大又结实，油箱就藏在里面。油的重量还能压住机翼，飞起来更稳。',
+   th:'想一想：油用掉以后飞机变轻，飞行会有什么变化？'},
+  {ph:'🧰 起飞前', q:'起飞前要把机翼后面的襟翼(Flaps)放下来一截，为什么？',
+   o:['让机翼变大变弯，速度不快时也有足够升力','给飞机刹车','吓走小鸟'], a:0,
+   ex:'襟翼伸出来，机翼就像张开的鸟翅膀，起飞需要的速度就能低一些、跑道就能短一些。',
+   th:'你在模拟器里试过不放襟翼起飞吗？跑道会用多长？'},
+  {ph:'🛫 起飞', q:'为什么飞机喜欢逆着风起飞？',
+   o:['迎面吹来的风让机翼升力更大，跑道用得更短','顺风会把飞机吹脏','只是传统习惯'], a:0,
+   ex:'机翼的升力来自空气流过的速度。逆风等于白送一段风速，飞机更容易"飘"起来。',
+   th:'去模拟器做个实验：同一架飞机，顺风和逆风起飞，比比跑道用了多长！'},
+  {ph:'🛫 起飞', q:'跑道上加速时，机长喊"Rotate!"是要做什么？',
+   o:['轻轻拉杆让机头抬起来离地','原地转圈','打开旋转餐厅'], a:0,
+   ex:'Rotate就是"抬头"的口令——速度够了，拉杆，机头抬起，飞机离地！',
+   th:'机长英语时间：跟着念一遍 "V1... Rotate!"'},
+  {ph:'🛫 起飞', q:'飞机离地以后，第一件要收起来的是什么？',
+   o:['起落架（轮子）','遮阳板','广播'], a:0,
+   ex:'轮子在天上没用，挂在外面只会增加阻力、浪费燃油，所以一离地就收进肚子里。',
+   th:'想一想：还有什么东西是"用完就要收起来"的？'},
+  {ph:'☁️ 巡航', q:'客机为什么要飞到一万米那么高的地方？',
+   o:['高空空气稀薄阻力小，又平稳又省油','离太阳近一点比较暖和','为了看风景'], a:0,
+   ex:'一万米高空空气稀薄，飞机受到的阻力小，还能躲开大部分坏天气，又快又稳又省油。',
+   th:'再挖一层：空气稀薄阻力小，那发动机会不会也"吸不到气"？'},
+  {ph:'☁️ 巡航', q:'A320和737都只有两台发动机，如果空中一台坏了会怎样？',
+   o:['另一台足够让飞机安全飞到机场','马上往下掉','飞机会倒着飞'], a:0,
+   ex:'双发客机设计的时候就保证：只用一台发动机也能安全飞行和降落。安全是设计出来的，不是靠运气。',
+   th:'想一想：你的学习计划里有没有这种"备用方案"？'},
+  {ph:'☁️ 巡航', q:'一万米高空，机舱外面的温度大约是多少？',
+   o:['零下50多度','和地面差不多','30度左右'], a:0,
+   ex:'外面冷到零下50多度！所以机舱要密封加压加温，窗户才会结冰花。',
+   th:'想一想：为什么越高越冷，明明离太阳更近了？这是个特别棒的问题！'},
+  {ph:'☁️ 巡航', q:'机翼尖上翘起来的小翅膀（翼梢小翼）是干什么的？',
+   o:['挡住机翼尖打转的乱流，更省油','纯粹为了好看','是天线'], a:0,
+   ex:'机翼尖会产生打转的"涡流"白白浪费力气，小翼像一堵小墙挡住它，一年能省好多燃油。',
+   th:'观察一下：A320和737的小翼长得一样吗？'},
+  {ph:'🛬 降落', q:'准备降落时，飞行员要先做哪件事？',
+   o:['放下起落架和襟翼，照着降落检查单来','把发动机关掉','打开舱门透气'], a:0,
+   ex:'降落和起飞一样有自己的检查单：襟翼放下、轮子放下、速度调好，一条条核对。',
+   th:'起飞和降落的检查单，哪些项目可能是一样的？'},
+  {ph:'🛬 降落', q:'如果快落地时跑道上突然有情况，飞行员会怎么办？',
+   o:['复飞——加满油门重新爬升，绕一圈再来','硬着头皮落下去','在空中停住等待'], a:0,
+   ex:'这叫复飞(Go Around)，是完全正常的安全操作，检查单里专门写着它。重来一次不丢人，安全最大。',
+   th:'这像不像做题：发现不对就大胆重来，比硬撑强！'},
+  {ph:'🛬 降落', q:'落地瞬间，机翼上"哗"地立起来好多板子，那是什么？',
+   o:['扰流板，把飞机压在地上帮助刹车','机翼坏掉了','太阳能板'], a:0,
+   ex:'扰流板立起来破坏升力，把飞机牢牢压在跑道上，轮子刹车才刹得住。',
+   th:'下次在模拟器落地时，注意看机翼的变化！'},
+  {ph:'🛬 降落', q:'塔台说"可以降落"，飞行员为什么一定要复述一遍指令？',
+   o:['确认自己没有听错','出于礼貌','锻炼英语口语'], a:0,
+   ex:'天上不能听错一个字！复述(read back)让塔台能检查飞行员是否听对了。重要的话，说回去确认。',
+   th:'机长英语：塔台说 "Cleared to land, runway 36." 你该怎么回答？'},
+  {ph:'🧰 起飞前', q:'起飞前机长要核对"V1、VR、V2"这三个数字，它们是什么？',
+   o:['起飞过程中三个非常重要的速度','三个机场的代码','三种燃油的标号'], a:0,
+   ex:'V1是"决断速度"——到这个速度就不能再放弃起飞了；VR是"抬轮速度"，到了就拉杆抬机头；V2是离地后能安全爬升的速度。这些数字飞机起飞前都要提前算好。',
+   th:'想一想：为什么这些速度要提前算好，不能等飞起来再临时反应？'},
+  {ph:'🧰 起飞前', q:'A320检查单上"AUTOBRAKE"（自动刹车）起飞前一般会设置成什么档位？',
+   o:['MAX（最大）','OFF（关闭）','一半档位'], a:0,
+   ex:'起飞前自动刹车通常设到MAX，这样万一需要中断起飞，飞机能立刻用最大的刹车力快速停下来——这是为最坏情况做准备。',
+   th:'想一想：写作业前先想好"如果卡住了怎么办"，是不是也是一种"自动刹车"？'},
+  {ph:'🧰 起飞前', q:'飞机推出停机位之前，地面人员要先做的"CHOCKS REMOVED"是什么意思？',
+   o:['移走轮挡（防止飞机滑动的小木块）','检查机翼有没有冰','给飞机加油'], a:0,
+   ex:'轮挡(Chocks)是垫在轮子前后防止飞机停着时自己滑动的小木块，飞机要推出去之前必须先把它们移走。',
+   th:'想一想：飞机停着的时候，"刹车+轮挡"两道保险，是不是也是一种"双重检查"？'},
+  {ph:'🛫 起飞', q:'A320起飞检查单写着"Smoothly increase thrust to 40% N1"，这句话是什么意思？',
+   o:['先把油门稳稳推到40%，让发动机转速先跟上','一次性把油门推到最大','把油门推到负数让飞机倒退'], a:0,
+   ex:'起飞时不能猛推油门，要先稳定推到40% N1，让发动机转速先平稳跟上，再继续加大推力，这样发动机更平稳、更耐用。',
+   th:'想一想：做一件大事之前先"热身"、慢慢加速，是不是比一下子全力冲更稳？'},
+  {ph:'🛫 起飞', q:'飞机离地后，检查单要求看到"POSITIVE RATE"（确认飞机真的在往上飞）才能做哪件事？',
+   o:['收起落架（GEAR UP）','打开舱门','把发动机关掉'], a:0,
+   ex:'必须先确认飞机真的在向上爬升(正爬升率)，才能收起落架——万一飞机其实还没真正飞起来就把轮子收了，那就太危险了。',
+   th:'想一想："先确认结果，再做下一步"这个习惯，用在检查作业上行不行？'},
+  {ph:'🛫 起飞', q:'飞机加速到安全速度后，检查单上的"FLAPS 0"是什么意思？',
+   o:['把起飞时放出的襟翼全部收回去','把襟翼放到最大','打开机翼上的灯'], a:0,
+   ex:'起飞时放出的襟翼能在低速时提供更多升力，等飞机加速到足够快，就要把襟翼收回(FLAPS 0)，减少阻力，飞得更省油。',
+   th:'想一想：襟翼"放出"和"收回"，分别对应飞机的什么阶段？'},
+  {ph:'☁️ 巡航', q:'飞机下降时检查单写着"FL240... 0.76 MACH"，这句话和什么有关？',
+   o:['在2万4千英尺高度时，飞机下降该用的速度','飞机的型号编号','跑道的编号'], a:0,
+   ex:'"马赫数(MACH)"是拿声音传播的速度做参考的速度单位，0.76马赫大约是声速的76%。检查单告诉飞行员，在不同高度该用多快的速度下降才合适。',
+   th:'想一想：声音传播也需要时间，那么"音爆"是怎么发生的？可以查一查～'},
+  {ph:'☁️ 巡航', q:'飞机下降到1万英尺以下时，检查单要求速度不能超过多少？',
+   o:['250节(KIAS)','500节','1000节'], a:0,
+   ex:'低空空气更稠密，飞太快不仅不安全，也容易超过飞机结构能承受的限制，所以国际规定1万英尺以下要限速250节。',
+   th:'想一想："离地面越近、越要小心慢一点"，这个道理在生活中还有哪里用得到？'},
+  {ph:'☁️ 巡航', q:'检查单上"ANTI ICE"（防冰）系统写着"AS REQUIRED"（需要时再开），什么时候需要打开它？',
+   o:['遇到云层、低温等容易结冰的天气时','飞机一起飞就一直开着','只有落地以后才开'], a:0,
+   ex:'飞进云层或者温度很低的时候，机翼和发动机进气口容易结冰，这时就要打开防冰系统；天气晴朗、温度不低时就不用一直开着浪费能量。',
+   th:'想一想：机翼结冰为什么很危险？（提示：跟"升力"有关，可以问问爸爸妈妈或者查一查）'},
+  {ph:'🛬 降落', q:'飞机进入"APPROACH"（进近）阶段，检查单要求先把速度减到210节，才能做哪件事？',
+   o:['放出第一档襟翼（FLAPS 1）','打开舱门','关掉一台发动机'], a:0,
+   ex:'检查单上先写"建立210节速度"，再写"FLAPS 1"——飞机要先减速到安全范围，才能放出第一级襟翼，不然又大又薄的襟翼会被强风吹坏。',
+   th:'想一想：为什么不同档位的襟翼，要在不同的速度下才能放出来？'},
+  {ph:'🛬 降落', q:'飞机快落地前，检查单上"GND SPOILERS"（地面扰流板）要设置成"ARM"（预位/待命），这是什么意思？',
+   o:['提前设置好，一接地就会自动立起来帮忙刹车','把扰流板永久焊死','起飞前才用的设置'], a:0,
+   ex:'"ARM"是"预位待命"的意思——提前把扰流板设好，一旦轮子接触跑道，它们就会自动"哗"地立起来，帮助飞机减速、压在地面上。',
+   th:'想一想："提前准备好，关键时刻自动启动"，你的书包里有没有这样的东西？'},
+  {ph:'🛬 降落', q:'飞机落地减速到60节(KIAS)时，检查单要求做什么？',
+   o:['取消反推力(CANCEL REVERSE THRUST)','重新加速起飞','打开所有车灯'], a:0,
+   ex:'反推力（让发动机的气流往前喷帮助刹车）如果在低速时还开着，反而会把跑道上的沙石吹进发动机里，所以减到60节左右就要取消反推。',
+   th:'想一想：飞机落地减速时，刹车、扰流板、反推力三个"刹车帮手"是怎么配合工作的？'},
+];
+function startAir(){
+  const byPh = ph => shuffle(AIRQ.filter(x=>x.ph.includes(ph))).slice(0,2);
+  game = { qs:[...byPh('起飞前'),...byPh('🛫'),...byPh('巡航'),...byPh('降落')], i:0, ok:0, res:[], lock:false };
+  $('airL').classList.add('show');
+  renderAirQ();
+}
+function renderAirQ(){
+  const q = game.qs[game.i];
+  $('aDots').innerHTML = game.qs.map((_,k)=>`<div class="dot ${k<game.i?(game.res[k]?'ok':'bad'):(k===game.i?'cur':'')}"></div>`).join('');
+  $('aPhase').textContent = q.ph;
+  $('aQ').textContent = q.q;
+  const order = shuffle(q.o.map((t,idx)=>({t,idx})));
+  $('aOpts').innerHTML = order.map(o=>`<button class="opt" onclick="pickAir(this,${o.idx})">${o.t}</button>`).join('');
+  $('aEx').style.display='none'; $('aOpts').style.display='flex';
+  game.lock = false;
+}
+function pickAir(btn, idx){
+  if (game.lock) return; game.lock = true;
+  const q = game.qs[game.i];
+  const right = idx === q.a;
+  game.res[game.i] = right;
+  if (right){ btn.classList.add('right'); game.ok++; beep([784,988]); }
+  else {
+    btn.classList.add('wrong'); beep([330]);
+    [...document.querySelectorAll('#aOpts .opt')].forEach(b=>{
+      if (b.textContent === q.o[q.a]) b.classList.add('right');
+    });
+  }
+  $('aExT').innerHTML = (right?'✅ 答对了！':'💡 正确答案在上面～')+' '+q.ex;
+  $('aTh').textContent = q.th || '';
+  $('aEx').style.display='block';
+}
+function nextAir(){
+  game.i++;
+  if (game.i >= game.qs.length) completeTask(Math.round(game.ok/game.qs.length*100));
+  else renderAirQ();
+}
+
+/* ================= 语文知识点闯关 ================= */
+const CHINESEQ = [
+  {q:'"美丽"的近义词是？', o:['漂亮','丑陋','高大','聪明'], a:0, ex:'"美丽"和"漂亮"意思相近，都是形容好看、好。'},
+  {q:'"高兴"的反义词是？', o:['开心','难过','活泼','安静'], a:1, ex:'"高兴"是开心的意思，反义词就是"难过"。'},
+  {q:'"一___鱼"，应该填什么量词？', o:['条','只','个','张'], a:0, ex:'鱼一般用"条"作量词，比如"一条鱼""一条小河"。'},
+  {q:'"一___小鸟"，应该填什么量词？', o:['条','只','片','块'], a:1, ex:'小动物常用"只"作量词，比如"一只小鸟""一只蝴蝶"。'},
+  {q:'"守株待兔"这个成语出自哪一类文章？', o:['寓言故事','诗歌','说明文','日记'], a:0, ex:'"守株待兔"是一则寓言故事，讲一个农夫等着兔子自己撞过来，结果地都荒了。'},
+  {q:'《绝句》"迟日江山丽，春风花草香"的作者是？', o:['杜甫','李白','王安石','苏轼'], a:0, ex:'这首《绝句》是唐代诗人杜甫写的，描绘了春天江山秀丽、花草飘香的景象。'},
+  {q:'《元日》这首诗写的是哪个传统节日？', o:['春节','清明节','中秋节','重阳节'], a:0, ex:'"爆竹声中一岁除"说的就是过年放爆竹，《元日》写的是春节(过年)的景象。'},
+  {q:'"遥知兄弟登高处，遍插茱萸少一人"出自哪首诗？', o:['《九月九日忆山东兄弟》','《清明》','《元日》','《静夜思》'], a:0, ex:'这是王维《九月九日忆山东兄弟》里的诗句，写重阳节登高、思念家人。'},
+  {q:'"语重心长"中的"重"应该读什么音？', o:['zhòng','chóng'], a:0, ex:'"语重心长"形容话说得深刻有分量，这里"重"读zhòng（重要的"重"）。'},
+  {q:'"渐渐"的"渐"是什么部首？', o:['三点水','火字旁','提手旁','竹字头'], a:0, ex:'"渐"是三点水旁，和"水"有关，本义和水流逐渐侵蚀有关。'},
+  {q:'"今天的天气真好啊"，句末应该用什么标点？', o:['！','？','，','；'], a:0, ex:'这句话表达了赞叹的语气，所以用感叹号"！"。'},
+  {q:'《陶罐和铁罐》这篇课文告诉我们什么道理？', o:['每个人都有长处和短处，要正确看待自己和别人','铁比陶结实','要爱护文物','要节约用水'], a:0, ex:'陶罐谦虚，铁罐骄傲，最后铁罐生锈消失，陶罐却保存了下来——告诉我们要看到自己和别人各有长处短处，不能骄傲自大。'},
+  {q:'"守株待兔"这个故事告诉我们什么道理？', o:['不能把偶然的事当成必然，要靠自己的努力','兔子很笨','种田很辛苦','树根很硬'], a:0, ex:'农夫因为一次偶然捡到撞死的兔子，就以为天天都有这种好事，结果荒废了田地——提醒我们不能心存侥幸、靠运气。'},
+  {q:'《蜜蜂》这篇课文的作者是谁？', o:['法布尔','安徒生','老舍','巴金'], a:0, ex:'《蜜蜂》节选自法国昆虫学家法布尔的《昆虫记》，他通过做实验观察蜜蜂的本领。'},
+  {q:'赵州桥是我国哪个朝代修建的著名石拱桥？', o:['隋朝','唐朝','宋朝','明朝'], a:0, ex:'赵州桥建于隋朝，距今已经有一千四百多年历史，是世界上现存最早的石拱桥之一。'},
+  {q:'《一幅名扬中外的画》写的是哪幅名画？', o:['《清明上河图》','《蒙娜丽莎》','《富春山居图》','《千里江山图》'], a:0, ex:'课文介绍的是北宋画家张择端的《清明上河图》，画的是当时都城汴京热闹的景象。'},
+  {q:'"梅子黄时日日晴"中"梅子黄时"指的大约是哪个季节？', o:['夏初（梅雨季节）','深秋','寒冬','早春'], a:0, ex:'梅子成熟变黄大约在初夏，这个时节江南多雨，所以又叫"梅雨季节"。'},
+  {q:'《海底世界》这篇课文主要写了什么？', o:['海底奇特的景象和丰富的物产','太空探险','沙漠风光','高山植物'], a:0, ex:'课文按"宁静的表面、热闹的活动、丰富的物产"等方面介绍了神奇的海底世界。'},
+  {q:'"她说：‘我们去公园吧。’"这句话里冒号的作用是？', o:['提示下面是说的话','表示停顿','表示举例','表示并列'], a:0, ex:'冒号常用在"说、想、问"等词语后面，提示下面要引出说话的具体内容。'},
+  {q:'"落叶"和"丢三落四"中的"落"读音一样吗？', o:['不一样，"落"是多音字','一样'], a:0, ex:'"落叶"中"落"读lùo，"丢三落四"中"落"读là，是个多音字，要根据词语意思判断读音。'},
+  {q:'《枣核》这篇课文里的枣核给人留下的印象是？', o:['聪明勇敢、本领很大','很普通','很笨','长得很大'], a:0, ex:'枣核虽然身材很小，却用智慧帮乡亲们夺回了牛和银子，是个聪明勇敢的小英雄。'},
+  {q:'《我变成了一棵树》是一篇什么类型的文章？', o:['充满想象的童话故事','说明文','新闻报道','古诗'], a:0, ex:'这篇课文想象自己变成了一棵树，肚子里藏着各种好吃的，是一篇想象奇特的童话。'},
+  {q:'"总把新桃换旧符"中的"桃符"指的是？', o:['桃木做的春联，新年时挂在门上','一种桃子','一种符咒','一种乐器'], a:0, ex:'古人春节时会在桃木板上写字挂在门口辟邪迎新，叫"桃符"，后来演变成春联。'},
+  {q:'下面哪个词形容人非常勤劳、不知疲倦？', o:['孜孜不倦','无所事事','三心二意','游手好闲'], a:0, ex:'"孜孜不倦"形容做事勤勤恳恳、不知疲倦，是表扬人的好词语。'},
+  {q:'《鹿角的诱惑》这个故事告诉我们什么道理？', o:['不能只看外表，要正确看待自己的长处和短处','鹿角越漂亮越好','腿没什么用','要爱护小动物'], a:0, ex:'鹿很欣赏自己美丽的角，却抱怨四条难看的细腿，可遇到危险时正是这四条腿救了它的命——告诉我们不能只凭外表判断价值，要正确看待自己的长处和短处。'},
+  {q:'《池子与河流》这首诗告诉我们什么道理？', o:['才能只有充分利用，奋斗的人生才有意义','池子比河流舒服','河流很危险','要节约用水'], a:0, ex:'池子安逸清闲却渐渐干枯，河流奔流不息反而充满活力——告诉我们才能只有不断使用，奋斗的人生才有意义。'},
+  {q:'"和面"中的"和"应该读什么音？', o:['huó','hé','huò','hè'], a:0, ex:'"和面"指在粉状物里搅拌揉弄使粘在一起，这里"和"读huó；"和平"中的"和"才读hé，是个多音字。'},
+  {q:'"到处"和"处理"中的"处"，读音一样吗？', o:['不一样，是多音字','一样'], a:0, ex:'"到处"中"处"读chù（表示地方），"处理"中"处"读chǔ（表示安排、解决）——是个多音字，要根据意思判断。'},
+  {q:'《我不能失信》这篇课文赞扬了宋庆龄的什么品质？', o:['诚实守信','勇敢机智','勤劳节俭','谦虚礼让'], a:0, ex:'宋庆龄为了履行对小珍的承诺，放弃去伯伯家看鸽子——这件事赞扬了她诚实守信的可贵品质。'},
+  {q:'《肥皂泡》一文表达了作者怎样的感情？', o:['对童年生活的留恋','研究肥皂泡的科学原理','呼吁保护环境','对大自然的敬畏'], a:0, ex:'课文按"做肥皂水→吹肥皂泡→赏肥皂泡→由肥皂泡产生的美好想象"的顺序叙述，表达了作者对童年生活的留恋。'},
+  {q:'"称职"和"匀称"中的"称"，读音一样吗？', o:['不一样，是多音字','一样'], a:0, ex:'"称职"中"称"读chèn（适合），"称呼""称赞"中"称"读chēng（叫做、赞扬）——是个多音字。'},
+  {q:'"温暖"的近义词是？', o:['暖和','寒冷','凉爽','干燥'], a:0, ex:'"温暖"和"暖和"意思相近，都形容不冷。'},
+  {q:'"勇敢"的反义词是？', o:['勤劳','胆小','聪明','善良'], a:1, ex:'"勇敢"指不怕困难危险，反义词是"胆小"。'},
+  {q:'"一___大船"，应该填什么量词？', o:['艘','只','个','条'], a:0, ex:'船一般用"艘"作量词，比如"一艘轮船""一艘军舰"。'},
+  {q:'"一___街道"，应该填什么量词？', o:['条','只','个','张'], a:0, ex:'长条形的事物常用"条"作量词，比如"一条街道""一条河"。'},
+  {q:'"长大"和"很长"中的"长"，读音一样吗？', o:['不一样，是多音字','一样'], a:0, ex:'"长大"中"长"读zhǎng（生长），"很长"中"长"读cháng（长度大）——是个多音字。'},
+  {q:'"还有"和"还书"中的"还"，读音一样吗？', o:['不一样，是多音字','一样'], a:0, ex:'"还有"中"还"读hái（表示仍然、又），"还书"中"还"读huán（归还）——是个多音字。'},
+  {q:'"你叫什么名字"，句末应该用什么标点？', o:['？','！','。','，'], a:0, ex:'这是一句问话，句末要用问号"？"。'},
+  {q:'形容做事非常细心、一点都不马虎的成语是？', o:['一丝不苟','三心二意','粗心大意','马马虎虎'], a:0, ex:'"一丝不苟"形容做事十分细致认真，一点不马虎。'},
+  {q:'形容两个人关系亲密、总在一起的成语是？', o:['形影不离','南辕北辙','各奔东西','水火不容'], a:0, ex:'"形影不离"形容两人关系亲密，像形体和影子一样分不开，总在一起。'},
+  {q:'形容大海波浪很大、气势猛烈的成语是？', o:['波涛汹涌','风平浪静','一帆风顺','细水长流'], a:0, ex:'"波涛汹涌"形容水波翻腾，气势浩大猛烈，多用来形容大海或江河。'},
+  {q:'形容颜色多种多样、非常好看的成语是？', o:['五光十色','黑白分明','千篇一律','暗淡无光'], a:0, ex:'"五光十色"形容色彩鲜艳，花样繁多。'},
+  {q:'形容一眼望不到边、非常辽阔的成语是？', o:['一望无际','寸步难行','弹丸之地','井底之蛙'], a:0, ex:'"一望无际"形容草原、大海、田野等十分辽阔，一眼望不到边。'},
+  {q:'"南辕北辙"这个成语用来比喻什么？', o:['行动和目的正好相反','两个人很要好','做事很认真','路途很遥远'], a:0, ex:'"南辕北辙"原指车想往南走却朝北行驶，比喻行动和目标完全相反，事与愿违。'},
+  {q:'《纸的发明》这篇课文告诉我们造纸术是谁改进的？', o:['蔡伦','张衡','华佗','孔子'], a:0, ex:'东汉时期的蔡伦改进了造纸的方法，使纸的质量更好、成本更低，便于推广。'},
+  {q:'《赵州桥》这篇课文主要赞美了赵州桥的什么特点？', o:['雄伟、坚固、美观','颜色鲜艳','很长很高','是木头做的'], a:0, ex:'课文从"雄伟""坚固""美观"三个方面介绍了赵州桥，赞美了我国古代劳动人民的智慧和才干。'},
+  {q:'《小真的长头发》中，小真发挥想象，说长头发可以用来做什么？', o:['钓鱼、当晾衣绳、做面条等','剪短卖钱','编成帽子','染成彩色'], a:0, ex:'小真发挥想象，说自己的长头发可以用来钓鱼、晾衣服、做面条等等，充满童趣和想象力。'},
+  {q:'"立刻出发"中的"立刻"的近义词是？', o:['马上','慢慢','曾经','偶尔'], a:0, ex:'"立刻"表示时间很短、马上，"马上"和它意思相近。'},
+  {q:'"热闹"的反义词是？', o:['吵闹','安静','拥挤','繁华'], a:1, ex:'"热闹"形容人多、气氛活跃，反义词是"安静"。'},
+  {q:'"漫步在公园里"，"漫步"是什么意思？', o:['悠闲地散步','匆忙地奔跑','大声地喊叫','安静地坐着'], a:0, ex:'"漫步"指悠闲随意地走，没有目的地、不着急地散步。'},
+  {q:'《大青树下的小学》写的是哪里的小学生活？', o:['我国西南边疆的民族小学','北京的小学','农村的小学','沿海城市的小学'], a:0, ex:'课文描绘了我国西南边疆地区，不同民族的小学生快乐学习、团结友爱的生活场景。'},
+];
+function startChinese(){
+  game = { qs: shuffle(CHINESEQ).slice(0,10), i:0, ok:0, res:[], lock:false };
+  $('chineseL').classList.add('show');
+  renderChineseQ();
+}
+function renderChineseQ(){
+  const q = game.qs[game.i];
+  $('cDots').innerHTML = game.qs.map((_,k)=>`<div class="dot ${k<game.i?(game.res[k]?'ok':'bad'):(k===game.i?'cur':'')}"></div>`).join('');
+  $('cQ').textContent = q.q;
+  const order = shuffle(q.o.map((t,idx)=>({t,idx})));
+  $('cOpts').innerHTML = order.map(o=>`<button class="opt" onclick="pickChinese(this,${o.idx})">${o.t}</button>`).join('');
+  $('cEx').style.display='none'; $('cOpts').style.display='flex';
+  game.lock = false;
+}
+function pickChinese(btn, idx){
+  if (game.lock) return; game.lock = true;
+  const q = game.qs[game.i];
+  const right = idx === q.a;
+  game.res[game.i] = right;
+  if (right){ btn.classList.add('right'); game.ok++; beep([784,988]); }
+  else {
+    btn.classList.add('wrong'); beep([330]);
+    [...document.querySelectorAll('#cOpts .opt')].forEach(b=>{ if (b.textContent === q.o[q.a]) b.classList.add('right'); });
+  }
+  $('cExT').innerHTML = (right?'✅ 答对了！':'💡 正确答案在上面～')+' '+q.ex;
+  $('cEx').style.display='block';
+}
+function nextChinese(){
+  game.i++;
+  if (game.i >= game.qs.length) completeTask(Math.round(game.ok/game.qs.length*100));
+  else renderChineseQ();
+}
+
+/* ================= 错题强化练习 =================
+   这里的题目由爸爸/Claude在"看下今天的作业"之后，
+   根据 错题本 文件夹里的作业照片批改结果手动更新：
+   - 做对的知识点：原题再练一遍巩固
+   - 做错的知识点：换一道同类型题，确认是否真的学会了
+   格式：{subject:'数学'|'语文'|'英语', q:'题干', o:['选项1','选项2',...], a:正确选项下标, ex:'讲解'}
+
+   ⚠️ 累积规则：每次"看下作业"后，请在数组末尾【追加】新的一批题目，
+   并加上当天日期的注释（如 // 2026-06-20 数学作业批改后生成），
+   不要删除或覆盖之前的题目。题库会随着时间越来越大，
+   抽题时会从全部历史错题里随机选10题，不再局限于"今天"的错题，
+   这样孩子可以不断巩固之前学过但容易再错的知识点。
+   如果某道题对应的知识点孩子已经多次做对、确实掌握了，
+   可以手动把这一条从数组里删掉，给新题让位。
+*/
+let REINFORCEQ = [
+  // 2026-06-13 数学校本作业(周末卷15)批改后生成
+  {subject:'数学', q:'168÷12的商是多少？', o:['14','41','12','21'], a:0, ex:'用竖式算一算：12×14=168 ✓，所以商是14。今天卷子里144÷12=12算对了，但写答案时不小心写成了17，算完一定要回头检查一下，把每一位数字按顺序抄对哦～'},
+  {subject:'数学', q:'1200÷(450-400) 等于多少？', o:['24','60','12','48'], a:0, ex:'要先算括号里面的：450-400=50，再算1200÷50=24。括号里的运算要先算，顺序不能搞反——这和今天卷子里 900÷(348-323) 是同一种类型，正确答案应该是36，不是40。'},
+  {subject:'数学', q:'"200减去80的差，除以24，商是多少？"下面哪个算式是对的？', o:['(200-80)÷24','24÷(200-80)','200÷(80-24)','80÷(200-24)'], a:0, ex:'"A减去B的差，除以C"的意思是先算(A-B)，再用结果去除以C，写成(A-B)÷C。今天卷子里"100减去52的差除以48"也是这一类，正确算式是(100-52)÷48，不能写成48÷(100-52)（虽然这次刚好算出来都是1，但顺序是错的）。'},
+  {subject:'数学', q:'操场上原来有6名男生、3名女生，后来走了2名男生，现在女生人数占全部人数的几分之几？', o:['3/7','3/9','2/3','1/3'], a:0, ex:'先算现在一共有多少人：6-2=4（男生），4+3=7（总人数）。女生3人占总人数7人的3/7。求"占全部的几分之几"要先用加法算出现在的总人数，今天卷子里那道题算成了"3×4=12"，把加法变成了乘法，要注意区分哦～'},
+  {subject:'数学', q:'李叔叔用20米长的篱笆，一面靠墙围一块长方形菜地，已知菜地的长是8米，这块菜地的宽是多少米？', o:['6','12','10','4'], a:0, ex:'一面靠墙，篱笆只用在长方形另外三条边上：1条长+2条宽=20米。所以2条宽=20-8=12米，宽=12÷2=6米。先用总长度减去"长"，再除以2，顺序不能搞反——今天卷子里这类题算成了"28÷2-12"，先除后减就错啦。'},
+];
+function startReinforce(){
+  if (!REINFORCEQ.length){
+    $('reinforceL').classList.add('show');
+    $('rDots').innerHTML = '';
+    $('rQ').textContent = '今天还没有错题练习题哦～ 把作业照片放进"错题本"文件夹，跟我说"看下今天的作业"，我就会帮你出题啦！';
+    $('rOpts').innerHTML = '';
+    $('rEx').style.display='block';
+    $('rExT').innerHTML = '点击下方按钮先去做别的任务吧～';
+    const nb = document.querySelector('#reinforceL .nextB');
+    if (nb){ nb.textContent = '退出 ▶'; nb.onclick = quitGame; }
+    return;
+  }
+  game = { qs: shuffle(REINFORCEQ).slice(0, Math.min(10, REINFORCEQ.length)), i:0, ok:0, res:[], lock:false };
+  $('reinforceL').classList.add('show');
+  renderReinforceQ();
+}
+function renderReinforceQ(){
+  const q = game.qs[game.i];
+  $('rDots').innerHTML = game.qs.map((_,k)=>`<div class="dot ${k<game.i?(game.res[k]?'ok':'bad'):(k===game.i?'cur':'')}"></div>`).join('');
+  $('rQ').textContent = (q.subject?`【${q.subject}】`:'')+q.q;
+  const order = shuffle(q.o.map((t,idx)=>({t,idx})));
+  $('rOpts').innerHTML = order.map(o=>`<button class="opt" onclick="pickReinforce(this,${o.idx})">${o.t}</button>`).join('');
+  $('rEx').style.display='none'; $('rOpts').style.display='flex';
+  const nb = document.querySelector('#reinforceL .nextB');
+  if (nb){ nb.textContent = '下一题 ▶'; nb.onclick = nextReinforce; }
+  game.lock = false;
+}
+function pickReinforce(btn, idx){
+  if (game.lock) return; game.lock = true;
+  const q = game.qs[game.i];
+  const right = idx === q.a;
+  game.res[game.i] = right;
+  if (right){ btn.classList.add('right'); game.ok++; beep([784,988]); }
+  else {
+    btn.classList.add('wrong'); beep([330]);
+    [...document.querySelectorAll('#rOpts .opt')].forEach(b=>{ if (b.textContent === q.o[q.a]) b.classList.add('right'); });
+  }
+  $('rExT').innerHTML = (right?'✅ 答对了！':'💡 正确答案在上面～')+' '+q.ex;
+  $('rEx').style.display='block';
+}
+function nextReinforce(){
+  game.i++;
+  if (game.i >= game.qs.length) completeTask(Math.round(game.ok/game.qs.length*100));
+  else renderReinforceQ();
+}
+
+/* ================= 古诗填空 ================= */
+const POEMQ = [
+  {title:'《绝句》· 杜甫', line:'____日江山丽，春风花草香。', ans:'迟', py:'chí'},
+  {title:'《绝句》· 杜甫', line:'迟日江山丽，春风花____香。', ans:'草', py:'cǎo'},
+  {title:'《绝句》· 杜甫', line:'泥融飞____子，沙暖睡鸳鸯。', ans:'燕', py:'yàn'},
+  {title:'《绝句》· 杜甫', line:'泥融飞燕子，沙暖睡____鸯。', ans:'鸳', py:'yuān'},
+  {title:'《惠崇春江晚景》· 苏轼', line:'竹外____花三两枝，春江水暖鸭先知。', ans:'桃', py:'táo'},
+  {title:'《惠崇春江晚景》· 苏轼', line:'竹外桃花三两枝，春江水____鸭先知。', ans:'暖', py:'nuǎn'},
+  {title:'《惠崇春江晚景》· 苏轼', line:'____蒿满地芦芽短，正是河豚欲上时。', ans:'蒌', py:'lóu'},
+  {title:'《惠崇春江晚景》· 苏轼', line:'蒌蒿满地芦芽短，正是____豚欲上时。', ans:'河', py:'hé'},
+  {title:'《三衢道中》· 曾几', line:'梅子____时日日晴，小溪泛尽却山行。', ans:'黄', py:'huáng'},
+  {title:'《三衢道中》· 曾几', line:'梅子黄时日日晴，小溪____尽却山行。', ans:'泛', py:'fàn'},
+  {title:'《三衢道中》· 曾几', line:'绿阴不____来时路，添得黄鹂四五声。', ans:'减', py:'jiǎn'},
+  {title:'《三衢道中》· 曾几', line:'绿阴不减来时路，添得____鹂四五声。', ans:'黄', py:'huáng'},
+  {title:'《元日》· 王安石', line:'____竹声中一岁除，春风送暖入屠苏。', ans:'爆', py:'bào'},
+  {title:'《元日》· 王安石', line:'爆竹声中一岁除，春风送暖入____苏。', ans:'屠', py:'tú'},
+  {title:'《元日》· 王安石', line:'千门万户____曈日，总把新桃换旧符。', ans:'曈', py:'tóng'},
+  {title:'《元日》· 王安石', line:'千门万户曈曈日，总把新____换旧符。', ans:'桃', py:'táo'},
+  {title:'《清明》· 杜牧', line:'清明时节雨____纷，路上行人欲断魂。', ans:'纷', py:'fēn'},
+  {title:'《清明》· 杜牧', line:'清明时节雨纷纷，路上行人欲____魂。', ans:'断', py:'duàn'},
+  {title:'《清明》· 杜牧', line:'借问____家何处有？牧童遥指杏花村。', ans:'酒', py:'jiǔ'},
+  {title:'《清明》· 杜牧', line:'借问酒家何处有？牧童遥指____花村。', ans:'杏', py:'xìng'},
+  {title:'《九月九日忆山东兄弟》· 王维', line:'独在异乡为____客，每逢佳节倍思亲。', ans:'异', py:'yì'},
+  {title:'《九月九日忆山东兄弟》· 王维', line:'独在异乡为异客，每逢____节倍思亲。', ans:'佳', py:'jiā'},
+  {title:'《九月九日忆山东兄弟》· 王维', line:'遥知兄弟登____处，遍插茱萸少一人。', ans:'高', py:'gāo'},
+  {title:'《九月九日忆山东兄弟》· 王维', line:'遥知兄弟登高处，遍插____萸少一人。', ans:'茱', py:'zhū'},
+  {title:'《静夜思》· 李白', line:'床前明____光，疑是地上霜。', ans:'月', py:'yuè'},
+  {title:'《静夜思》· 李白', line:'举头望明月，____头思故乡。', ans:'低', py:'dī'},
+  {title:'《登鹳雀楼》· 王之涣', line:'白日依____尽，黄河入海流。', ans:'山', py:'shān'},
+  {title:'《登鹳雀楼》· 王之涣', line:'欲穷千里目，更上一____楼。', ans:'层', py:'céng'},
+  {title:'《咏柳》· 贺知章', line:'碧玉妆成一树____，万条垂下绿丝绦。', ans:'高', py:'gāo'},
+  {title:'《咏柳》· 贺知章', line:'不知细叶谁裁出，二月春风似____刀。', ans:'剪', py:'jiǎn'},
+  {title:'《小池》· 杨万里', line:'泉眼无声惜细____，树阴照水爱晴柔。', ans:'流', py:'liú'},
+  {title:'《小池》· 杨万里', line:'小荷才露尖尖角，早有____蜓立上头。', ans:'蜻', py:'qīng'},
+  {title:'《村居》· 高鼎', line:'草长____飞二月天，拂堤杨柳醉春烟。', ans:'莺', py:'yīng'},
+  {title:'《村居》· 高鼎', line:'儿童散学归来早，忙趁东风放纸____。', ans:'鸢', py:'yuān'},
+  {title:'《所见》· 袁枚', line:'牧童骑黄牛，歌声振林____。', ans:'樾', py:'yuè'},
+  {title:'《所见》· 袁枚', line:'意欲捕鸣蝉，忽然闭口____。', ans:'立', py:'lì'},
+  {title:'《池上》· 白居易', line:'小娃撑小____，偷采白莲回。', ans:'艇', py:'tǐng'},
+  {title:'《池上》· 白居易', line:'不解藏踪迹，浮萍一道____。', ans:'开', py:'kāi'},
+  {title:'《游子吟》· 孟郊', line:'慈母手中____，游子身上衣。', ans:'线', py:'xiàn'},
+  {title:'《游子吟》· 孟郊', line:'谁言寸草心，报得三春____。', ans:'晖', py:'huī'},
+  {title:'《望天门山》· 李白', line:'天门中断楚江____，碧水东流至此回。', ans:'开', py:'kāi'},
+  {title:'《望天门山》· 李白', line:'两岸青山相对出，孤帆一片日边____。', ans:'来', py:'lái'},
+  {title:'《望庐山瀑布》· 李白', line:'日照香炉生紫____，遥看瀑布挂前川。', ans:'烟', py:'yān'},
+  {title:'《望庐山瀑布》· 李白', line:'飞流直下三千尺，疑是银河落九____。', ans:'天', py:'tiān'},
+  {title:'《山行》· 杜牧', line:'远上寒山石径____，白云生处有人家。', ans:'斜', py:'xié'},
+  {title:'《山行》· 杜牧', line:'停车坐爱枫林晚，霜叶红于二月____。', ans:'花', py:'huā'},
+  {title:'《枫桥夜泊》· 张继', line:'月落乌啼霜满____，江枫渔火对愁眠。', ans:'天', py:'tiān'},
+  {title:'《枫桥夜泊》· 张继', line:'姑苏城外寒山寺，夜半钟声到客____。', ans:'船', py:'chuán'},
+  {title:'《悯农》· 李绅', line:'锄禾日当____，汗滴禾下土。', ans:'午', py:'wǔ'},
+  {title:'《悯农》· 李绅', line:'谁知盘中餐，粒粒皆辛____。', ans:'苦', py:'kǔ'},
+  {title:'《回乡偶书》· 贺知章', line:'少小离家老大____，乡音无改鬓毛衰。', ans:'回', py:'huí'},
+  {title:'《回乡偶书》· 贺知章', line:'儿童相见不相识，笑问客从何处____。', ans:'来', py:'lái'},
+  {title:'《江雪》· 柳宗元', line:'千山鸟飞____，万径人踪灭。', ans:'绝', py:'jué'},
+  {title:'《江雪》· 柳宗元', line:'孤舟蓑笠翁，独钓寒江____。', ans:'雪', py:'xuě'},
+  {title:'《敕勒歌》', line:'天似穹庐，笼盖四____。', ans:'野', py:'yě'},
+  {title:'《敕勒歌》', line:'天苍苍，野茫茫，风吹草低见牛____。', ans:'羊', py:'yáng'},
+  {title:'《饮湖上初晴后雨》· 苏轼', line:'水光潋滟晴方____，山色空蒙雨亦奇。', ans:'好', py:'hǎo'},
+  {title:'《饮湖上初晴后雨》· 苏轼', line:'欲把西湖比西子，淡妆浓抹总相____。', ans:'宜', py:'yí'},
+];
+function startPoem(){
+  game = { qs: shuffle(POEMQ).slice(0,10), i:0, ok:0, res:[], lock:false };
+  $('poemL').classList.add('show');
+  renderPoemQ();
+}
+function renderPoemQ(){
+  const q = game.qs[game.i];
+  $('pDots').innerHTML = game.qs.map((_,k)=>`<div class="dot ${k<game.i?(game.res[k]?'ok':'bad'):(k===game.i?'cur':'')}"></div>`).join('');
+  $('pTitle').textContent = q.title;
+  $('pLine').textContent = q.line;
+  $('pPy').innerHTML = '';
+  const wrongPool = [...new Set(POEMQ.filter(x=>x.ans!==q.ans).map(x=>x.ans))];
+  const wrong = shuffle(wrongPool).slice(0,3);
+  const opts = shuffle([q.ans, ...wrong]);
+  $('pOpts').innerHTML = opts.map(o=>`<button class="opt" onclick="pickPoem(this,'${o}')">${o}</button>`).join('');
+  game.ans = q.ans; game.qPy = q.py; game.lock = false;
+}
+function pickPoem(btn, val){
+  if (game.lock) return; game.lock = true;
+  const right = val === game.ans;
+  game.res[game.i] = right;
+  $('pPy').innerHTML = `答案：<b style="color:#2b5a8a;">${game.ans}</b>（拼音：<b style="color:#2b5a8a;">${game.qPy}</b>）`;
+  if (right){ btn.classList.add('right'); game.ok++; beep([784,988]); }
+  else {
+    btn.classList.add('wrong'); beep([330]);
+    [...document.querySelectorAll('#pOpts .opt')].find(b=>b.textContent===game.ans).classList.add('right');
+  }
+  setTimeout(()=>{
+    game.i++;
+    if (game.i >= game.qs.length) completeTask(Math.round(game.ok/game.qs.length*100));
+    else renderPoemQ();
+  }, right ? 650 : 1400);
+}
+
+/* ================= 英语句子排序 ================= */
+const ORDERQ = [
+  {cn:'我有一支红色的笔。', words:['I','have','a','red','pen'], punc:'.'},
+  {cn:'这是我的朋友。', words:['This','is','my','friend'], punc:'.'},
+  {cn:'我喜欢苹果。', words:['I','like','apples'], punc:'.'},
+  {cn:'你叫什么名字？', words:['What','is','your','name'], punc:'?'},
+  {cn:'你好吗？', words:['How','are','you'], punc:'?'},
+  {cn:'我会游泳。', words:['I','can','swim'], punc:'.'},
+  {cn:'她是我的姐姐。', words:['She','is','my','sister'], punc:'.'},
+  {cn:'早上好！', words:['Good','morning'], punc:'!'},
+  {cn:'我是一名学生。', words:['I','am','a','student'], punc:'.'},
+  {cn:'他有一只大狗。', words:['He','has','a','big','dog'], punc:'.'},
+  {cn:'猫在哪里？', words:['Where','is','the','cat'], punc:'?'},
+  {cn:'我想要一些水。', words:['I','want','some','water'], punc:'.'},
+  {cn:'很高兴认识你。', words:['Nice','to','meet','you'], punc:'.'},
+  {cn:'这是一个小球。', words:['This','is','a','small','ball'], punc:'.'},
+];
+function startOrder(){
+  game = { qs: shuffle(ORDERQ).slice(0,8), i:0, ok:0, res:[], picked:[], pool:[], locked:false };
+  $('orderL').classList.add('show');
+  renderOrderQ();
+}
+function renderOrderQ(){
+  const q = game.qs[game.i];
+  $('oDots').innerHTML = game.qs.map((_,k)=>`<div class="dot ${k<game.i?(game.res[k]?'ok':'bad'):(k===game.i?'cur':'')}"></div>`).join('');
+  $('oCn').textContent = '🇨🇳 ' + q.cn;
+  game.picked = [];
+  game.pool = shuffle(q.words.map((w,idx)=>({w,idx})));
+  game.locked = false;
+  $('oFeedback').style.display='none';
+  $('oCheck').style.display='block';
+  $('oNext').style.display='none';
+  renderOrderUI();
+}
+function renderOrderUI(){
+  const q = game.qs[game.i];
+  const puncChip = `<span class="wchip punc">${q.punc}</span>`;
+  $('oAns').innerHTML = (game.picked.length
+    ? game.picked.map((p,k)=>`<button class="wchip" onclick="unpickOrderWord(${k})">${p.w}</button>`).join('')
+    : '<span class="oPh">点一下下面的单词，按顺序拼成句子吧～</span>') + puncChip;
+  $('oBank').innerHTML = game.pool.map((p,k)=>`<button class="wchip" onclick="pickOrderWord(${k})">${p.w}</button>`).join('');
+  $('oCheck').disabled = game.picked.length !== q.words.length;
+}
+function pickOrderWord(k){
+  if (game.locked) return;
+  game.picked.push(game.pool[k]);
+  game.pool.splice(k,1);
+  renderOrderUI();
+}
+function unpickOrderWord(k){
+  if (game.locked) return;
+  game.pool.push(game.picked[k]);
+  game.picked.splice(k,1);
+  renderOrderUI();
+}
+function checkOrder(){
+  if (game.locked || game.picked.length===0) return;
+  const q = game.qs[game.i];
+  const right = game.picked.every((p,k)=>p.idx===k);
+  game.locked = true;
+  game.res[game.i] = right;
+  if (right){ game.ok++; beep([784,988]); $('oFeedback').innerHTML = '✅ 排对了！真棒！'; }
+  else { beep([330]); $('oFeedback').innerHTML = `💡 正确顺序：<b>${q.words.join(' ')}${q.punc}</b>`; }
+  $('oFeedback').style.display='block';
+  $('oCheck').style.display='none';
+  $('oNext').style.display='block';
+}
+function nextOrder(){
+  game.i++;
+  if (game.i >= game.qs.length) completeTask(Math.round(game.ok/game.qs.length*100));
+  else renderOrderQ();
+}
+
+/* ================= 读书汇报 ================= */
+const BOOK_STEPS = [
+  {p:'📖 这本书的名字是什么？', h:'作者也可以写上（不记得就不写）', input:true},
+  {p:'① 这本书讲了什么？', h:'用你自己的话说，2-3句就够。提示：谁？发生了什么？最后怎么样了？'},
+  {p:'② 你最喜欢或最惊讶的地方是哪里？为什么？', h:'可以是一个情节、一个人物、一句话，重点是"为什么"'},
+  {p:'③ 读完后，你想提一个什么问题？', h:'问作者、问主角、问这个世界都可以。好问题比答案更珍贵！'},
+  {p:'④ 这本书让你想到了什么？', h:'自己经历的事、看过的别的书、一个新点子……都可以'},
+];
+let book = null;
+function startBook(){
+  book = { step:0, ans:['','','','',''] };
+  $('bookL').classList.add('show');
+  renderBookStep();
+}
+function renderBookStep(){
+  const st = BOOK_STEPS[book.step];
+  $('bDots').innerHTML = BOOK_STEPS.map((_,k)=>`<div class="dot ${k<book.step?'ok':(k===book.step?'cur':'')}"></div>`).join('');
+  $('bPrompt').textContent = st.p;
+  $('bHint').textContent = st.h;
+  $('bInput').style.display = st.input ? 'block' : 'none';
+  $('bArea').style.display = st.input ? 'none' : 'block';
+  if (st.input) $('bInput').value = book.ans[book.step];
+  else $('bArea').value = book.ans[book.step];
+  $('bPrev').style.visibility = book.step===0 ? 'hidden' : 'visible';
+  $('bNext').textContent = book.step===BOOK_STEPS.length-1 ? '完成汇报 🎉' : '下一步 ▶';
+}
+function saveBookStep(){
+  const st = BOOK_STEPS[book.step];
+  book.ans[book.step] = (st.input ? $('bInput').value : $('bArea').value).trim();
+}
+function bookPrev(){ saveBookStep(); if (book.step>0){ book.step--; renderBookStep(); } }
+function bookNext(){
+  saveBookStep();
+  if (book.ans[book.step].length < 2){
+    showPop('🐶','再写一点点～','狗狗想多听一句！随便写，写错也没关系。');
+    return;
+  }
+  if (book.step < BOOK_STEPS.length-1){ book.step++; renderBookStep(); return; }
+  S.books.push({ title:book.ans[0], date:todayKey(), a:book.ans.slice(1) });
+  const t = S.tasks[curIdx];
+  t.done = true; t.acc = null; save();
+  renderTasks(); renderBooks(); closeLayers();
+  feed(2, {em:'📚', t:'读书汇报完成！', p:`《${book.ans[0]}》已收进读后感收藏，奖励双倍喂食 🦴🦴`});
+}
+function renderBooks(){
+  $('bookList').innerHTML = S.books.length
+    ? S.books.map((b,i)=>`<div class="bkItem"><span style="font-size:18px;">📕</span>
+        <div class="t">《${b.title}》<small>${b.date}</small></div>
+        <button onclick="viewBook(${i})">查看</button></div>`).join('')
+    : '<span class="noMedal">读完一本书，来做第一个读书汇报吧！</span>';
+}
+function viewBook(i){
+  const b = S.books[i];
+  showPop('📖', `《${b.title}》`,
+    `讲了什么：${b.a[0]}\n\n最喜欢/最惊讶：${b.a[1]}\n\n我的问题：${b.a[2]}\n\n让我想到：${b.a[3]}`);
+}
+function exportBooks(){
+  if (!S.books.length){ showPop('📚','还没有读后感','先完成一次读书汇报吧！'); return; }
+  const txt = S.books.map(b =>
+    `《${b.title}》  ${b.date}\n一、这本书讲了什么：\n${b.a[0]}\n二、最喜欢/最惊讶的地方：\n${b.a[1]}\n三、我的问题：\n${b.a[2]}\n四、让我想到：\n${b.a[3]}\n`
+  ).join('\n----------------------\n\n');
+  const blob = new Blob(['一诺的读后感收藏\n\n'+txt], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '一诺的读后感.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ================= 计时任务 ================= */
+let tInt=null, tElapsed=0;
+function startTimer(t){
+  tElapsed = 0;
+  $('tTitle').textContent = '⏰ ' + t.name;
+  $('tClock').textContent = fmt(tElapsed);
+  $('timerL').classList.add('show');
+  tInt = setInterval(()=>{
+    tElapsed++; $('tClock').textContent = fmt(tElapsed);
+  },1000);
+}
+const fmt = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+function finishTimerEarly(){
+  if(tInt){clearInterval(tInt);tInt=null;}
+  const t = S.tasks[curIdx];
+  t.usedMin = Math.round(tElapsed/60*10)/10;
+  completeTask(null);
+}
+function abortTimer(){ if(tInt){clearInterval(tInt);tInt=null;} closeLayers(); }
+
+/* ================= 通用 ================= */
+function quitGame(){ closeLayers(); }
+function closeLayers(){ document.querySelectorAll('.layer').forEach(l=>l.classList.remove('show')); }
+function showPop(em,t,p){ $('pEm').textContent=em; $('pT').textContent=t; $('pP').textContent=p; $('pop').style.display='flex'; }
+function closePop(){ $('pop').style.display='none'; }
+function confetti(){
+  const ems=['🎉','⭐','🦴','🐾','💛','🌟'];
+  for(let i=0;i<28;i++){
+    const d=document.createElement('div'); d.className='cf'; d.textContent=ems[i%ems.length];
+    d.style.left=Math.random()*100+'vw'; d.style.animationDelay=(Math.random()*.7)+'s';
+    $('confetti').appendChild(d); setTimeout(()=>d.remove(),3400);
+  }
+}
+function beep(notes){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    notes.forEach((f,i)=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.frequency.value=f;o.type='sine';o.connect(g);g.connect(ctx.destination);
+      g.gain.setValueAtTime(.16,ctx.currentTime+i*.16);
+      g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+i*.16+.15);
+      o.start(ctx.currentTime+i*.16);o.stop(ctx.currentTime+i*.16+.16);
+    });
+  }catch(e){}
+}
+
+renderPet(); renderTasks(); renderBadges(); renderBooks(); renderRainbow(); save();
+</script>
+</body>
+</html>
