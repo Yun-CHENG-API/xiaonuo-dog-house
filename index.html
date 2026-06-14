@@ -402,9 +402,12 @@
   <div class="qcard">
     <div class="phChip" id="pTitle"></div>
     <div class="qair" id="pLine"></div>
-    <div class="qipa" id="pPy" style="justify-content:center;"></div>
   </div>
   <div class="opts" id="pOpts"></div>
+  <div class="exBox" id="pEx" style="display:none;">
+    <div id="pExT"></div>
+    <button class="b-main nextB" onclick="nextPoem()">下一句 ▶</button>
+  </div>
 </div></div>
 
 <!-- 英语句子排序层 -->
@@ -1735,28 +1738,31 @@ function renderPoemQ(){
   $('pDots').innerHTML = game.qs.map((_,k)=>`<div class="dot ${k<game.i?(game.res[k]?'ok':'bad'):(k===game.i?'cur':'')}"></div>`).join('');
   $('pTitle').textContent = q.title;
   $('pLine').textContent = q.line;
-  $('pPy').innerHTML = '';
   const wrongPool = [...new Set(POEMQ.filter(x=>x.ans!==q.ans).map(x=>x.ans))];
   const wrong = shuffle(wrongPool).slice(0,3);
   const opts = shuffle([q.ans, ...wrong]);
   $('pOpts').innerHTML = opts.map(o=>`<button class="opt" onclick="pickPoem(this,'${o}')">${o}</button>`).join('');
+  $('pEx').style.display = 'none';
   game.ans = q.ans; game.qPy = q.py; game.qMean = q.mean; game.lock = false;
 }
 function pickPoem(btn, val){
   if (game.lock) return; game.lock = true;
   const right = val === game.ans;
   game.res[game.i] = right;
-  $('pPy').innerHTML = `答案：<b style="color:#2b5a8a;">${game.ans}</b>（拼音：<b style="color:#2b5a8a;">${game.qPy}</b>）` + (game.qMean ? `<div style="margin-top:6px;font-size:13px;color:#6b5128;font-weight:normal;line-height:1.6;">📖 ${game.qMean}</div>` : '');
+  let html = (right ? '✅ 答对了！' : '💡 正确答案在上面～') + ` 答案：<b style="color:#2b5a8a;">${game.ans}</b>（拼音：<b style="color:#2b5a8a;">${game.qPy}</b>）`;
+  if (game.qMean) html += `<div style="margin-top:8px;">📖 ${game.qMean}</div>`;
+  $('pExT').innerHTML = html;
+  $('pEx').style.display = 'block';
   if (right){ btn.classList.add('right'); game.ok++; beep([784,988]); }
   else {
     btn.classList.add('wrong'); beep([330]);
     [...document.querySelectorAll('#pOpts .opt')].find(b=>b.textContent===game.ans).classList.add('right');
   }
-  setTimeout(()=>{
-    game.i++;
-    if (game.i >= game.qs.length) completeTask(Math.round(game.ok/game.qs.length*100));
-    else renderPoemQ();
-  }, right ? 650 : 1400);
+}
+function nextPoem(){
+  game.i++;
+  if (game.i >= game.qs.length) completeTask(Math.round(game.ok/game.qs.length*100));
+  else renderPoemQ();
 }
 
 /* ================= 英语句子排序 ================= */
@@ -1775,6 +1781,36 @@ let ORDERQ = [
   {cn:'我想要一些水。', words:['I','want','some','water'], punc:'.'},
   {cn:'很高兴认识你。', words:['Nice','to','meet','you'], punc:'.'},
   {cn:'这是一个小球。', words:['This','is','a','small','ball'], punc:'.'},
+  {cn:'这是我的书包。', words:['This','is','my','school','bag'], punc:'.'},
+  {cn:'我有两只眼睛。', words:['I','have','two','eyes'], punc:'.'},
+  {cn:'你喜欢香蕉吗？', words:['Do','you','like','bananas'], punc:'?'},
+  {cn:'它是一只小猫。', words:['It','is','a','little','cat'], punc:'.'},
+  {cn:'我们是好朋友。', words:['We','are','good','friends'], punc:'.'},
+  {cn:'那是什么？', words:['What','is','that'], punc:'?'},
+  {cn:'我爸爸是医生。', words:['My','father','is','a','doctor'], punc:'.'},
+  {cn:'请打开你的书。', words:['Please','open','your','book'], punc:'.'},
+  {cn:'现在几点了？', words:['What','time','is','it'], punc:'?'},
+  {cn:'我每天七点起床。', words:['I','get','up','at','seven'], punc:'.'},
+  {cn:'她有一头长发。', words:['She','has','long','hair'], punc:'.'},
+  {cn:'这些是我的玩具。', words:['These','are','my','toys'], punc:'.'},
+  {cn:'我们一起去公园吧。', words:["Let's",'go','to','the','park'], punc:'.'},
+  {cn:'今天天气很好。', words:['The','weather','is','nice','today'], punc:'.'},
+  {cn:'我会骑自行车。', words:['I','can','ride','a','bike'], punc:'.'},
+  {cn:'你的铅笔在桌子上。', words:['Your','pencil','is','on','the','desk'], punc:'.'},
+  {cn:'我们正在上数学课。', words:['We','are','having','a','maths','lesson'], punc:'.'},
+  {cn:'他正在踢足球。', words:['He','is','playing','football'], punc:'.'},
+  {cn:'我想吃一个汉堡。', words:['I','want','a','hamburger'], punc:'.'},
+  {cn:'猴子喜欢吃香蕉。', words:['Monkeys','like','eating','bananas'], punc:'.'},
+  {cn:'教室里有二十个学生。', words:['There','are','twenty','students','in','the','classroom'], punc:'.'},
+  {cn:'我的生日在六月。', words:['My','birthday','is','in','June'], punc:'.'},
+  {cn:'你能帮我吗？', words:['Can','you','help','me'], punc:'?'},
+  {cn:'我们星期六不上学。', words:['We',"don't",'go','to','school','on','Saturday'], punc:'.'},
+  {cn:'它有四条腿和一条尾巴。', words:['It','has','four','legs','and','a','tail'], punc:'.'},
+  // 以下4句难度提高一些（Power Up 4 程度：一般过去时、比较级、将来时）
+  {cn:'昨天我去了动物园。', words:['I','went','to','the','zoo','yesterday'], punc:'.'},
+  {cn:'这只大象比那只猴子大。', words:['The','elephant','is','bigger','than','the','monkey'], punc:'.'},
+  {cn:'明天我们要去郊游。', words:['We','are','going','to','have','a','picnic','tomorrow'], punc:'.'},
+  {cn:'上周末我看了一场电影。', words:['I','watched','a','film','last','weekend'], punc:'.'},
 ];
 
 /* =====================================================
