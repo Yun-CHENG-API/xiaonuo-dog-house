@@ -182,10 +182,13 @@
   .cf { position:absolute; font-size:24px; animation:fall 2.6s ease-in forwards; }
   @keyframes fall { from{transform:translateY(-40px) rotate(0)} to{transform:translateY(105vh) rotate(540deg); opacity:.2} }
   .hint { text-align:center; font-size:12px; color:#c4a87a; margin-top:16px; line-height:1.7; }
+  .wxTip { display:none; background:#fff3cd; color:#8a5a00; font-size:13px; line-height:1.6; padding:10px 14px; border-radius:14px; margin-bottom:10px; text-align:center; }
+  .wxTip b { color:#c0392b; }
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="wxTip" id="wxTip">⚠️ 检测到你正在用<b>微信</b>打开，部分功能（比如语音输入）可能无法使用。<br>请点击右上角 <b>···</b>，选择「<b>在Safari中打开</b>」，体验会更完整哦～</div>
   <div class="topbar">
     <h1>🐾 小诺狗狗学习屋</h1>
     <div style="display:flex;align-items:center;gap:6px;">
@@ -2145,6 +2148,12 @@ setupVoiceButton($('rfMic1'), () => $('rfArea1'));
 setupVoiceButton($('rfMic2'), () => $('rfArea2'));
 
 renderPet(); renderTasks(); renderBadges(); renderBooks(); renderRainbow(); save();
+
+/* 微信内置浏览器提示：部分功能（语音输入等）在微信里可能受限，引导用户用Safari打开 */
+if (/MicroMessenger/i.test(navigator.userAgent)){
+  const tip = $('wxTip');
+  if (tip) tip.style.display = 'block';
+}
 </script>
 </body>
 </html>
