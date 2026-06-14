@@ -61,16 +61,6 @@
   .growTxt { position:absolute; inset:0; text-align:center; font-size:12px; line-height:24px; font-weight:bold; color:#7a4d12; }
   .growTip { font-size:12px; color:#b08c5a; margin-top:8px; }
 
-  /* ===== 学习彩虹 ===== */
-  .rainbowRow { display:flex; align-items:center; gap:8px; margin:10px 0; }
-  .rbLabel { width:46px; font-weight:bold; color:#7a4d12; font-size:14px; flex-shrink:0; }
-  .rainbowBar { flex:1; height:18px; border-radius:9px; position:relative; overflow:hidden;
-    background:linear-gradient(90deg,#ff595e,#ff924c,#ffca3a,#8ac926,#1982c4,#6a4c93,#52a675); }
-  .rbGray { position:absolute; top:0; right:0; height:100%; background:#e3ddd2; border-radius:0 9px 9px 0; transition:width .6s ease; }
-  .rbPct { width:46px; text-align:right; font-size:13px; color:#7a4d12; font-weight:bold; flex-shrink:0; }
-  .rbEmpty { font-size:12px; color:#cdbfa8; }
-  .rainbowTip { font-size:12px; color:#b08c5a; margin-top:6px; }
-
   /* ===== 任务 ===== */
   .task { display:flex; align-items:center; gap:10px; background:#fdf6ea; border-radius:14px; padding:12px; margin-bottom:9px; }
   .task.done { opacity:.55; }
@@ -263,12 +253,6 @@
     <h2><span id="growName">🐕 成长进度</span><span id="growPts">0/40</span></h2>
     <div class="growWrap"><div class="growBar" id="growBar"></div><div class="growTxt" id="growTxt"></div></div>
     <div class="growTip">完成任务 +1分 · 练习正确率≥90% +2分 · 1分=喂1次 · 喂满40分毕业换新狗狗！</div>
-  </div>
-
-  <div class="panel">
-    <h2><span>🌈 学习彩虹</span><span id="rainbowDate"></span></h2>
-    <div id="rainbowWrap"></div>
-    <div class="rainbowTip">每天作业批改后，正确率越高，彩虹就越完整漂亮～</div>
   </div>
 
   <div class="panel">
@@ -524,36 +508,8 @@ S.breed = S.breed || 0;
 S.medals = S.medals || [];
 S.tasks = S.tasks || [];
 S.books = S.books || [];
-S.subjectLog = S.subjectLog || {};
 S.reflections = S.reflections || [];
 const save = () => localStorage.setItem('xiaonuoDog', JSON.stringify(S));
-
-/* ================= 作业批改记录 =================
-   每次"看下今天的作业"批改后，由Claude在这里追加一条记录：
-   {date:'YYYY-MM-DD', subject:'数学'|'语文'|'英语', correct:对题数, total:总题数}
-   页面会自动把这些记录合并进存档，并在"学习彩虹"里显示当天的正确率。
-*/
-const HOMEWORK_LOG = [
-  {date:'2026-06-13', subject:'数学', correct:36, total:41},
-];
-HOMEWORK_LOG.forEach(e=>{
-  S.subjectLog[e.date] = S.subjectLog[e.date] || {};
-  S.subjectLog[e.date][e.subject] = {correct:e.correct, total:e.total};
-});
-function renderRainbow(){
-  const subjects = ['数学','语文','英语'];
-  const today = todayKey();
-  $('rainbowDate').textContent = today;
-  const log = S.subjectLog[today] || {};
-  $('rainbowWrap').innerHTML = subjects.map(subj=>{
-    const d = log[subj];
-    if (!d || !d.total){
-      return `<div class="rainbowRow"><div class="rbLabel">${subj}</div><div class="rainbowBar"><div class="rbGray" style="width:100%"></div></div><div class="rbPct rbEmpty">暂无</div></div>`;
-    }
-    const pct = Math.round(d.correct/d.total*100);
-    return `<div class="rainbowRow"><div class="rbLabel">${subj}</div><div class="rainbowBar"><div class="rbGray" style="width:${100-pct}%"></div></div><div class="rbPct">${pct}%</div></div>`;
-  }).join('');
-}
 
 /* ================= 狗狗绘制 ================= */
 function dogSVG(b, pts){
@@ -2185,7 +2141,7 @@ setupVoiceButton($('bMic'), () => (BOOK_STEPS[book ? book.step : 0].input ? $('b
 setupVoiceButton($('rfMic1'), () => $('rfArea1'));
 setupVoiceButton($('rfMic2'), () => $('rfArea2'));
 
-renderPet(); renderTasks(); renderBadges(); renderBooks(); renderRainbow(); save();
+renderPet(); renderTasks(); renderBadges(); renderBooks(); save();
 
 /* 微信内置浏览器提示：部分功能（语音输入等）在微信里可能受限，引导用户用Safari打开 */
 if (/MicroMessenger/i.test(navigator.userAgent)){
