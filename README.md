@@ -12,7 +12,7 @@ A single-page, self-contained HTML web app that turns daily homework and study h
 - **Mini study games ("屋里练")**, each randomly drawing from a question bank:
   - 📜 **Poetry fill-in-the-blank** – Classic Tang poems (五/七言绝句 from 唐诗三百首), with pinyin and a modern Chinese explanation of the line shown only after answering.
   - 📖 **Chinese knowledge points** – Quiz bank covering Grade 3 textbook concepts.
-  - 🔤 **English word matching** – Vocabulary quiz with text-to-speech pronunciation (British male voice).
+  - 🔤 **English word matching** – Vocabulary quiz (now ~340 words, including a KET/A2-level set) with text-to-speech pronunciation (British male voice). After picking the correct answer, the phonetic spelling, two related/synonym words, two contrasting/related words, and an example sentence (with Chinese translation) are revealed.
   - ✏️ **Sentence ordering** – Drag-and-drop English sentence reconstruction.
   - 🧮 **Math drills** – Quick arithmetic practice.
   - ✈️ **Aviation knowledge quiz** – Fun facts about aircraft, tied to the "captain" theme.
