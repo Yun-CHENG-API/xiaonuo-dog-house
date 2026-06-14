@@ -2066,7 +2066,7 @@ function closePop(){
   $('pop').style.display='none';
   if (lastGameType && REFLECT_PROMPTS[lastGameType]){
     const type = lastGameType; lastGameType = null;
-    showReflect(type);
+    if (Math.random() < 1/3) showReflect(type);
   }
 }
 function confetti(){
