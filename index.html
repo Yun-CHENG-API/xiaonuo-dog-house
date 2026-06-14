@@ -80,10 +80,10 @@
   .addRow button { flex:0 0 64px; background:#ff9d3a; color:#fff; font-size:15px; padding:12px 0; }
   .pomoRow { margin-top:12px; padding-top:12px; border-top:2px dashed #eadbc0; display:flex; flex-direction:column; gap:8px; }
   .pomoRow .bkIn { padding:12px; font-size:15px; }
-  .pomoRow input[type="file"] { font-size:12px; color:#8a6c42; }
-  .fileLbl { font-size:12px; color:#b08c5a; }
-  .fileName { font-size:12px; color:#7a5c33; }
   .pomoTip { font-size:12px; color:#b08c5a; }
+  .bookFileLbl { font-size:12px; color:#b08c5a; display:block; margin-top:8px; }
+  .bookFileName { font-size:12px; color:#7a5c33; }
+  .popImg { max-width:100%; border-radius:12px; margin:8px 0; }
   .tGoal { text-align:center; font-size:13px; color:#b08c5a; margin-top:-10px; }
   .b-main:disabled { background:#e8d8bd; color:#b08c5a; cursor:default; }
 
@@ -297,16 +297,8 @@
         </select>
         <button id="pomoAddBtn">添加</button>
       </div>
-      <label class="fileLbl" for="pomoFile">📎 可选：上传这次要用的画/谱子等资料</label>
-      <input type="file" id="pomoFile" accept="image/*,application/pdf">
-      <div class="fileName" id="pomoFileName"></div>
       <div class="pomoTip">坚持专注满设定时间，完成后奖励2分🦴🦴</div>
     </div>
-  </div>
-
-  <div class="panel">
-    <h2><span>📎 我的资料库</span></h2>
-    <div id="filesList"><span class="noMedal">画画、谱子等资料上传后会保存在这里，随时可以查看～</span></div>
   </div>
 
   <div class="panel">
@@ -427,6 +419,9 @@
     <input id="bInput" class="bkIn" style="display:none;" maxlength="30" placeholder="写在这里…">
     <textarea id="bArea" class="bkTa" style="display:none;" rows="5" placeholder="用自己的话写，写错字也没关系～"></textarea>
     <div class="micRow"><button class="micBtn" id="bMic">🎤 说出来，帮你写下</button></div>
+    <label class="bookFileLbl" id="bookFileLbl" for="bookFile" style="display:none;">📎 可选：上传这本书的封面或你画的读后感插画</label>
+    <input type="file" id="bookFile" accept="image/*" style="display:none;">
+    <div class="bookFileName" id="bookFileName"></div>
   </div>
   <div class="btnRow">
     <button class="b-sub" id="bPrev" onclick="bookPrev()">上一步</button>
@@ -488,6 +483,7 @@
 </div></div>
 
 <div id="pop"><div class="card"><div class="em" id="pEm">🎉</div><h3 id="pT"></h3><p id="pP"></p>
+  <img id="pImg" class="popImg" style="display:none;">
   <button onclick="closePop()">好的！</button></div></div>
 <div id="confetti"></div>
 
@@ -517,7 +513,6 @@ S.medals = S.medals || [];
 S.tasks = S.tasks || [];
 S.books = S.books || [];
 S.reflections = S.reflections || [];
-S.files = S.files || [];
 const save = () => localStorage.setItem('xiaonuoDog', JSON.stringify(S));
 
 /* ================= 狗狗绘制 ================= */
@@ -664,7 +659,7 @@ function renderTasks(){
   $('tasks').innerHTML = todo.length ? todo.map(({t,i})=>`
     <div class="task">
       <div class="icon">${t.type==='timer'?'🍅':t.type==='book'?'📚':'🎮'}</div>
-      <div class="name">${t.name}<small>${t.type==='timer' ? `专注${t.targetMin}分钟 · 坚持完成得2分🦴🦴${t.fileIdx!=null ? ' · 📎已存资料' : ''}` : t.type==='book' ? '读完一本书来汇报 · 奖励2分' : '屋里练 · 自动评分'}</small></div>
+      <div class="name">${t.name}<small>${t.type==='timer' ? `专注${t.targetMin}分钟 · 坚持完成得2分🦴🦴` : t.type==='book' ? '读完一本书来汇报 · 奖励2分' : '屋里练 · 自动评分'}</small></div>
       <button class="go" onclick="startTask(${i})">开始</button>
       <button class="del" title="删除任务" onclick="delTask(${i})">✕</button>
     </div>`).join('') : (S.tasks.length ? '<span class="noMedal">今天的任务都完成啦，真棒！🎉</span>' : '');
@@ -702,48 +697,13 @@ function readFileAsDataURL(file, cb){
     reader.readAsDataURL(file);
   }
 }
-$('pomoFile').onchange = () => {
-  const f = $('pomoFile').files[0];
-  $('pomoFileName').textContent = f ? `已选择：${f.name}` : '';
-};
 $('pomoAddBtn').onclick = () => {
   const name = $('pomoName').value.trim();
   if (!name) return;
   const min = parseInt($('pomoMin').value);
-  const finishAdd = (fileIdx) => {
-    S.tasks.push({name, type:'timer', done:false, acc:null, usedMin:null, targetMin:min, fileIdx: fileIdx!=null ? fileIdx : null});
-    save(); $('pomoName').value=''; $('pomoFile').value=''; $('pomoFileName').textContent=''; renderTasks();
-  };
-  const f = $('pomoFile').files[0];
-  if (f){
-    readFileAsDataURL(f, (data, mime) => {
-      if (data){
-        S.files.push({name:f.name, mime, data, taskName:name, date:todayKey()});
-        save(); renderFiles();
-        finishAdd(S.files.length-1);
-      } else {
-        finishAdd(null);
-      }
-    });
-  } else {
-    finishAdd(null);
-  }
+  S.tasks.push({name, type:'timer', done:false, acc:null, usedMin:null, targetMin:min});
+  save(); $('pomoName').value=''; renderTasks();
 };
-function renderFiles(){
-  $('filesList').innerHTML = S.files.length ? S.files.map((f,i)=>`
-    <div class="bkItem">
-      ${f.mime.startsWith('image/') ? `<img class="thumb" src="${f.data}">` : '<div class="ficon">📄</div>'}
-      <div class="t">${f.taskName}<small>${f.date}</small></div>
-      <a class="go" href="${f.data}" download="${f.name}">查看</a>
-      <button onclick="delFile(${i})">✕</button>
-    </div>`).join('') : '<span class="noMedal">画画、谱子等资料上传后会保存在这里，随时可以查看～</span>';
-}
-function delFile(i){
-  if (!confirm('删除这份资料吗？')) return;
-  S.files.splice(i,1);
-  S.tasks.forEach(t=>{ if(t.fileIdx===i) t.fileIdx=null; else if(t.fileIdx>i) t.fileIdx--; });
-  save(); renderFiles(); renderTasks();
-}
 function delTask(i){
   const t = S.tasks[i];
   if (!confirm(`删除任务「${t.name}」吗？`)) return;
@@ -1992,7 +1952,9 @@ const BOOK_STEPS = [
 ];
 let book = null;
 function startBook(){
-  book = { step:0, ans:['','','','',''] };
+  book = { step:0, ans:['','','','',''], img:null };
+  $('bookFile').value = '';
+  $('bookFileName').textContent = '';
   $('bookL').classList.add('show');
   renderBookStep();
 }
@@ -2005,9 +1967,18 @@ function renderBookStep(){
   $('bArea').style.display = st.input ? 'none' : 'block';
   if (st.input) $('bInput').value = book.ans[book.step];
   else $('bArea').value = book.ans[book.step];
+  $('bookFileLbl').style.display = book.step===0 ? 'block' : 'none';
+  $('bookFile').style.display = book.step===0 ? 'block' : 'none';
   $('bPrev').style.visibility = book.step===0 ? 'hidden' : 'visible';
   $('bNext').textContent = book.step===BOOK_STEPS.length-1 ? '完成汇报 🎉' : '下一步 ▶';
 }
+$('bookFile').onchange = () => {
+  const f = $('bookFile').files[0];
+  if (!f) return;
+  readFileAsDataURL(f, (data) => {
+    if (data){ book.img = data; $('bookFileName').textContent = `已选择：${f.name}`; }
+  });
+};
 function saveBookStep(){
   const st = BOOK_STEPS[book.step];
   book.ans[book.step] = (st.input ? $('bInput').value : $('bArea').value).trim();
@@ -2020,7 +1991,7 @@ function bookNext(){
     return;
   }
   if (book.step < BOOK_STEPS.length-1){ book.step++; renderBookStep(); return; }
-  S.books.push({ title:book.ans[0], date:todayKey(), a:book.ans.slice(1) });
+  S.books.push({ title:book.ans[0], date:todayKey(), a:book.ans.slice(1), img:book.img||null });
   const t = S.tasks[curIdx];
   t.done = true; t.acc = null; save();
   renderTasks(); renderBooks(); closeLayers();
@@ -2028,7 +1999,7 @@ function bookNext(){
 }
 function renderBooks(){
   $('bookList').innerHTML = S.books.length
-    ? S.books.map((b,i)=>`<div class="bkItem"><span style="font-size:18px;">📕</span>
+    ? S.books.map((b,i)=>`<div class="bkItem">${b.img ? `<img class="thumb" src="${b.img}">` : '<span style="font-size:18px;">📕</span>'}
         <div class="t">《${b.title}》<small>${b.date}</small></div>
         <button onclick="viewBook(${i})">查看</button></div>`).join('')
     : '<span class="noMedal">读完一本书，来做第一个读书汇报吧！</span>';
@@ -2037,6 +2008,7 @@ function viewBook(i){
   const b = S.books[i];
   showPop('📖', `《${b.title}》`,
     `讲了什么：${b.a[0]}\n\n最喜欢/最惊讶：${b.a[1]}\n\n我的问题：${b.a[2]}\n\n让我想到：${b.a[3]}`);
+  if (b.img){ $('pImg').src = b.img; $('pImg').style.display='block'; }
 }
 function exportBooks(){
   if (!S.books.length){ showPop('📚','还没有读后感','先完成一次读书汇报吧！'); return; }
@@ -2089,7 +2061,7 @@ function abortTimer(){ if(tInt){clearInterval(tInt);tInt=null;} closeLayers(); }
 /* ================= 通用 ================= */
 function quitGame(){ closeLayers(); }
 function closeLayers(){ document.querySelectorAll('.layer').forEach(l=>l.classList.remove('show')); }
-function showPop(em,t,p){ $('pEm').textContent=em; $('pT').textContent=t; $('pP').textContent=p; $('pop').style.display='flex'; }
+function showPop(em,t,p){ $('pEm').textContent=em; $('pT').textContent=t; $('pP').textContent=p; $('pImg').style.display='none'; $('pop').style.display='flex'; }
 function closePop(){
   $('pop').style.display='none';
   if (lastGameType && REFLECT_PROMPTS[lastGameType]){
@@ -2236,7 +2208,7 @@ setupVoiceButton($('bMic'), () => (BOOK_STEPS[book ? book.step : 0].input ? $('b
 setupVoiceButton($('rfMic1'), () => $('rfArea1'));
 setupVoiceButton($('rfMic2'), () => $('rfArea2'));
 
-renderPet(); renderTasks(); renderBadges(); renderBooks(); renderFiles(); save();
+renderPet(); renderTasks(); renderBadges(); renderBooks(); save();
 
 /* 微信内置浏览器提示：部分功能（语音输入等）在微信里可能受限，引导用户用Safari打开 */
 if (/MicroMessenger/i.test(navigator.userAgent)){
