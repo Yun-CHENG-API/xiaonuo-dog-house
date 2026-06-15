@@ -277,6 +277,7 @@
           <option value="g:math">数学口算闯关 🎮</option>
           <option value="g:chinese">语文知识点闯关 🎮</option>
           <option value="g:poem">古诗填空 🎮</option>
+          <option value="g:xie">语文听写默写 🎮</option>
           <option value="g:order">英语句子排序 🎮</option>
           <option value="g:air">飞机小航校 ✈️</option>
           <option value="g:book">读书汇报 📚</option>
@@ -390,6 +391,21 @@
   <div class="exBox" id="pEx" style="display:none;">
     <div id="pExT"></div>
     <button class="b-main nextB" onclick="nextPoem()">下一句 ▶</button>
+  </div>
+</div></div>
+
+<!-- 语文听写默写层 -->
+<div class="layer" id="xieL"><div class="lwrap">
+  <div class="lhead"><h3>✏️ 语文听写默写</h3><button class="quit" onclick="quitGame()">退出</button></div>
+  <div class="dots" id="xDots"></div>
+  <div class="qcard">
+    <div class="phChip" id="xUnit"></div>
+    <div class="qair" id="xPy"></div>
+  </div>
+  <div class="opts" id="xOpts"></div>
+  <div class="exBox" id="xEx" style="display:none;">
+    <div id="xExT"></div>
+    <button class="b-main nextB" onclick="nextXie()">下一题 ▶</button>
   </div>
 </div></div>
 
@@ -721,6 +737,7 @@ function startTask(i){
   else if (t.type==='book') startBook();
   else if (t.type==='chinese') startChinese();
   else if (t.type==='poem') startPoem();
+  else if (t.type==='xie') startXie();
   else if (t.type==='order') startOrder();
   else if (t.type==='reinforce') startReinforce();
   else startTimer(t);
@@ -1761,6 +1778,341 @@ function nextPoem(){
   else renderPoemQ();
 }
 
+/* ===== 语文听写默写题库（基于"默写纸"，三年级下册1-8单元词语） ===== */
+let XIEQ = [
+  // 第一单元（古诗三首/燕子/荷花/昆虫备忘录）
+  {w:'杜甫', py:'dù fǔ', unit:1},
+  {w:'融化', py:'róng huà', unit:1},
+  {w:'燕子', py:'yàn zi', unit:1},
+  {w:'鸳鸯', py:'yuān yāng', unit:1},
+  {w:'河豚', py:'hé tún', unit:1},
+  {w:'减少', py:'jiǎn shǎo', unit:1},
+  {w:'乌黑', py:'wū hēi', unit:1},
+  {w:'活泼', py:'huó pō', unit:1},
+  {w:'春日', py:'chūn rì', unit:1},
+  {w:'轻风', py:'qīng fēng', unit:1},
+  {w:'吹拂', py:'chuī fú', unit:1},
+  {w:'洒落', py:'sǎ luò', unit:1},
+  {w:'赶集', py:'gǎn jí', unit:1},
+  {w:'聚拢', py:'jù lǒng', unit:1},
+  {w:'形成', py:'xíng chéng', unit:1},
+  {w:'加入', py:'jiā rù', unit:1},
+  {w:'春光', py:'chūn guāng', unit:1},
+  {w:'平添', py:'píng tiān', unit:1},
+  {w:'稻田', py:'dào tián', unit:1},
+  {w:'湖面', py:'hú miàn', unit:1},
+  {w:'闲散', py:'xián sǎn', unit:1},
+  {w:'纤细', py:'xiān xì', unit:1},
+  {w:'荷花', py:'hé huā', unit:1},
+  {w:'清香', py:'qīng xiāng', unit:1},
+  {w:'花瓣', py:'huā bàn', unit:1},
+  {w:'莲蓬', py:'lián peng', unit:1},
+  {w:'破裂', py:'pò liè', unit:1},
+  {w:'姿势', py:'zī shì', unit:1},
+  {w:'眼前', py:'yǎn qián', unit:1},
+  {w:'本领', py:'běn lǐng', unit:1},
+  {w:'仿佛', py:'fǎng fú', unit:1},
+  {w:'微风', py:'wēi fēng', unit:1},
+  {w:'随风', py:'suí fēng', unit:1},
+  {w:'飘动', py:'piāo dòng', unit:1},
+  {w:'舞蹈', py:'wǔ dǎo', unit:1},
+  {w:'停止', py:'tíng zhǐ', unit:1},
+  {w:'翩翩起舞', py:'piān piān qǐ wǔ', unit:1},
+  // 第二单元（守株待兔/陶罐和铁罐/鹿角和鹿腿/池子与河流+语文园地成语）
+  {w:'国王', py:'guó wáng', unit:2},
+  {w:'骄傲', py:'jiāo ào', unit:2},
+  {w:'傲慢', py:'ào màn', unit:2},
+  {w:'谦虚', py:'qiān xū', unit:2},
+  {w:'懦弱', py:'nuò ruò', unit:2},
+  {w:'神气', py:'shén qì', unit:2},
+  {w:'住嘴', py:'zhù zuǐ', unit:2},
+  {w:'恼怒', py:'nǎo nù', unit:2},
+  {w:'王朝', py:'wáng cháo', unit:2},
+  {w:'尘土', py:'chén tǔ', unit:2},
+  {w:'惊讶', py:'jīng yà', unit:2},
+  {w:'光洁', py:'guāng jié', unit:2},
+  {w:'美观', py:'měi guān', unit:2},
+  {w:'古代', py:'gǔ dài', unit:2},
+  {w:'价值', py:'jià zhí', unit:2},
+  {w:'动手', py:'dòng shǒu', unit:2},
+  {w:'走着瞧', py:'zǒu zhe qiáo', unit:2},
+  {w:'相提并论', py:'xiāng tí bìng lùn', unit:2},
+  {w:'池塘', py:'chí táng', unit:2},
+  {w:'痛快', py:'tòng kuài', unit:2},
+  {w:'欣赏', py:'xīn shǎng', unit:2},
+  {w:'身段', py:'shēn duàn', unit:2},
+  {w:'匀称', py:'yún chèn', unit:2},
+  {w:'别致', py:'bié zhì', unit:2},
+  {w:'不禁', py:'bù jīn', unit:2},
+  {w:'机灵', py:'jī ling', unit:2},
+  {w:'哎呀', py:'āi yā', unit:2},
+  {w:'狮子', py:'shī zi', unit:2},
+  {w:'犹豫', py:'yóu yù', unit:2},
+  {w:'机会', py:'jī huì', unit:2},
+  {w:'叹气', py:'tàn qì', unit:2},
+  {w:'逃生', py:'táo shēng', unit:2},
+  {w:'灰心丧气', py:'huī xīn sàng qì', unit:2},
+  {w:'邯郸学步', py:'hán dān xué bù', unit:2},
+  {w:'滥竽充数', py:'làn yú chōng shù', unit:2},
+  {w:'掩耳盗铃', py:'yǎn ěr dào líng', unit:2},
+  {w:'自相矛盾', py:'zì xiāng máo dùn', unit:2},
+  {w:'刻舟求剑', py:'kè zhōu qiú jiàn', unit:2},
+  {w:'画蛇添足', py:'huà shé tiān zú', unit:2},
+  {w:'杞人忧天', py:'qǐ rén yōu tiān', unit:2},
+  {w:'井底之蛙', py:'jǐng dǐ zhī wā', unit:2},
+  {w:'杯弓蛇影', py:'bēi gōng shé yǐng', unit:2},
+  // 第三单元（纸的发明/赵州桥/一幅名扬中外的画+语文园地）
+  {w:'造纸术', py:'zào zhǐ shù', unit:3},
+  {w:'世界', py:'shì jiè', unit:3},
+  {w:'伟大', py:'wěi dà', unit:3},
+  {w:'贡献', py:'gòng xiàn', unit:3},
+  {w:'原料', py:'yuán liào', unit:3},
+  {w:'保存', py:'bǎo cún', unit:3},
+  {w:'需要', py:'xū yào', unit:3},
+  {w:'制作', py:'zhì zuò', unit:3},
+  {w:'尤其', py:'yóu qí', unit:3},
+  {w:'吸收', py:'xī shōu', unit:3},
+  {w:'经验', py:'jīng yàn', unit:3},
+  {w:'满足', py:'mǎn zú', unit:3},
+  {w:'记录', py:'jì lù', unit:3},
+  {w:'朝鲜', py:'cháo xiǎn', unit:3},
+  {w:'半岛', py:'bàn dǎo', unit:3},
+  {w:'日本', py:'rì běn', unit:3},
+  {w:'阿拉伯', py:'ā lā bó', unit:3},
+  {w:'欧洲', py:'ōu zhōu', unit:3},
+  {w:'社会', py:'shè huì', unit:3},
+  {w:'赵州桥', py:'zhào zhōu qiáo', unit:3},
+  {w:'石匠', py:'shí jiàng', unit:3},
+  {w:'设计', py:'shè jì', unit:3},
+  {w:'创举', py:'chuàng jǔ', unit:3},
+  {w:'冲击', py:'chōng jī', unit:3},
+  {w:'不但', py:'bú dàn', unit:3},
+  {w:'而且', py:'ér qiě', unit:3},
+  {w:'各自', py:'gè zì', unit:3},
+  {w:'似乎', py:'sì hū', unit:3},
+  {w:'体现', py:'tǐ xiàn', unit:3},
+  {w:'人民', py:'rén mín', unit:3},
+  {w:'智慧', py:'zhì huì', unit:3},
+  {w:'才干', py:'cái gàn', unit:3},
+  {w:'历史', py:'lì shǐ', unit:3},
+  {w:'大约', py:'dà yuē', unit:3},
+  // 第四单元（花钟/蜜蜂/小虾）
+  {w:'芬芳', py:'fēn fāng', unit:4},
+  {w:'迷人', py:'mí rén', unit:4},
+  {w:'艳丽', py:'yàn lì', unit:4},
+  {w:'醒来', py:'xǐng lái', unit:4},
+  {w:'万寿菊', py:'wàn shòu jú', unit:4},
+  {w:'欣然', py:'xīn rán', unit:4},
+  {w:'苏醒', py:'sū xǐng', unit:4},
+  {w:'关系', py:'guān xì', unit:4},
+  {w:'适宜', py:'shì yí', unit:4},
+  {w:'适应', py:'shì yìng', unit:4},
+  {w:'淡雅', py:'dàn yǎ', unit:4},
+  {w:'展示', py:'zhǎn shì', unit:4},
+  {w:'修建', py:'xiū jiàn', unit:4},
+  {w:'组成', py:'zǔ chéng', unit:4},
+  {w:'争奇斗艳', py:'zhēng qí dòu yàn', unit:4},
+  {w:'蜜蜂', py:'mì fēng', unit:4},
+  {w:'辨认', py:'biàn rèn', unit:4},
+  {w:'能力', py:'néng lì', unit:4},
+  {w:'大概', py:'dà gài', unit:4},
+  {w:'阻力', py:'zǔ lì', unit:4},
+  {w:'将近', py:'jiāng jìn', unit:4},
+  {w:'包括', py:'bāo kuò', unit:4},
+  {w:'检查', py:'jiǎn chá', unit:4},
+  {w:'迷失', py:'mí shī', unit:4},
+  {w:'准确', py:'zhǔn què', unit:4},
+  {w:'无误', py:'wú wù', unit:4},
+  {w:'尽管', py:'jǐn guǎn', unit:4},
+  {w:'逆风', py:'nì fēng', unit:4},
+  {w:'沿途', py:'yán tú', unit:4},
+  {w:'陌生', py:'mò shēng', unit:4},
+  {w:'确实', py:'què shí', unit:4},
+  {w:'超常', py:'chāo cháng', unit:4},
+  {w:'记忆', py:'jì yì', unit:4},
+  {w:'本能', py:'běn néng', unit:4},
+  // 第五单元（宇宙的另一边/我变成了一棵树）
+  {w:'星空', py:'xīng kōng', unit:5},
+  {w:'流淌', py:'liú tǎng', unit:5},
+  {w:'秘密', py:'mì mi', unit:5},
+  {w:'楼梯', py:'lóu tī', unit:5},
+  {w:'相遇', py:'xiāng yù', unit:5},
+  {w:'铃声', py:'líng shēng', unit:5},
+  {w:'思绪', py:'sī xù', unit:5},
+  {w:'瞬间', py:'shùn jiān', unit:5},
+  {w:'气喘吁吁', py:'qì chuǎn xū xū', unit:5},
+  {w:'形状', py:'xíng zhuàng', unit:5},
+  {w:'狐狸', py:'hú li', unit:5},
+  {w:'担心', py:'dān xīn', unit:5},
+  {w:'丁零', py:'dīng líng', unit:5},
+  {w:'失望', py:'shī wàng', unit:5},
+  {w:'巧克力', py:'qiǎo kè lì', unit:5},
+  {w:'香肠', py:'xiāng cháng', unit:5},
+  {w:'面包', py:'miàn bāo', unit:5},
+  {w:'花生', py:'huā shēng', unit:5},
+  {w:'牛奶', py:'niú nǎi', unit:5},
+  {w:'继续', py:'jì xù', unit:5},
+  {w:'想念', py:'xiǎng niàn', unit:5},
+  {w:'饭菜', py:'fàn cài', unit:5},
+  {w:'排骨', py:'pái gǔ', unit:5},
+  {w:'麻烦', py:'má fan', unit:5},
+  {w:'了解', py:'liǎo jiě', unit:5},
+  // 第六单元（童年的水墨画/剃头大师/肥皂泡）
+  {w:'垂柳', py:'chuí liǔ', unit:6},
+  {w:'梳妆', py:'shū zhuāng', unit:6},
+  {w:'钓竿', py:'diào gān', unit:6},
+  {w:'山洞', py:'shān dòng', unit:6},
+  {w:'嬉耍', py:'xì shuǎ', unit:6},
+  {w:'波动', py:'bō dòng', unit:6},
+  {w:'浪花', py:'làng huā', unit:6},
+  {w:'葫芦', py:'hú lu', unit:6},
+  {w:'松树', py:'sōng shù', unit:6},
+  {w:'洗澡', py:'xǐ zǎo', unit:6},
+  {w:'清爽', py:'qīng shuǎng', unit:6},
+  {w:'松针', py:'sōng zhēn', unit:6},
+  {w:'蘑菇', py:'mó gu', unit:6},
+  {w:'水墨画', py:'shuǐ mò huà', unit:6},
+  {w:'厘米', py:'lí mǐ', unit:6},
+  {w:'天分', py:'tiān fèn', unit:6},
+  {w:'虽然', py:'suī rán', unit:6},
+  {w:'央求', py:'yāng qiú', unit:6},
+  {w:'过年', py:'guò nián', unit:6},
+  {w:'双倍', py:'shuāng bèi', unit:6},
+  {w:'受刑', py:'shòu xíng', unit:6},
+  {w:'习惯', py:'xí guàn', unit:6},
+  {w:'摆布', py:'bǎi bù', unit:6},
+  {w:'仇人', py:'chóu rén', unit:6},
+  {w:'欢迎', py:'huān yíng', unit:6},
+  {w:'理发', py:'lǐ fà', unit:6},
+  {w:'辜负', py:'gū fù', unit:6},
+  {w:'胆小', py:'dǎn xiǎo', unit:6},
+  {w:'表弟', py:'biǎo dì', unit:6},
+  {w:'大师', py:'dà shī', unit:6},
+  {w:'希望', py:'xī wàng', unit:6},
+  {w:'目送', py:'mù sòng', unit:6},
+  {w:'婴儿', py:'yīng ér', unit:6},
+  {w:'熟睡', py:'shú shuì', unit:6},
+  {w:'飞跃', py:'fēi yuè', unit:6},
+  {w:'圆满', py:'yuán mǎn', unit:6},
+  {w:'形式', py:'xíng shì', unit:6},
+  {w:'分裂', py:'fēn liè', unit:6},
+  {w:'透明', py:'tòu míng', unit:6},
+  {w:'网球', py:'wǎng qiú', unit:6},
+  {w:'其中', py:'qí zhōng', unit:6},
+  {w:'种类', py:'zhǒng lèi', unit:6},
+  {w:'肥皂泡', py:'féi zào pào', unit:6},
+  // 第七单元（我们的奇妙世界/海底世界/火烧云）
+  {w:'奇妙', py:'qí miào', unit:7},
+  {w:'呈现', py:'chéng xiàn', unit:7},
+  {w:'降落', py:'jiàng luò', unit:7},
+  {w:'映射', py:'yìng shè', unit:7},
+  {w:'变幻', py:'biàn huàn', unit:7},
+  {w:'奇迹', py:'qí jì', unit:7},
+  {w:'诱人', py:'yòu rén', unit:7},
+  {w:'圆润', py:'yuán rùn', unit:7},
+  {w:'感叹', py:'gǎn tàn', unit:7},
+  {w:'光辉', py:'guāng huī', unit:7},
+  {w:'光芒', py:'guāng máng', unit:7},
+  {w:'飞翔', py:'fēi xiáng', unit:7},
+  {w:'冰柱', py:'bīng zhù', unit:7},
+  {w:'锋利', py:'fēng lì', unit:7},
+  {w:'刀剑', py:'dāo jiàn', unit:7},
+  {w:'珍珠', py:'zhēn zhū', unit:7},
+  {w:'普通', py:'pǔ tōng', unit:7},
+  {w:'模型', py:'mó xíng', unit:7},
+  {w:'存在', py:'cún zài', unit:7},
+  {w:'海底', py:'hǎi dǐ', unit:7},
+  {w:'宁静', py:'níng jìng', unit:7},
+  {w:'器官', py:'qì guān', unit:7},
+  {w:'是否', py:'shì fǒu', unit:7},
+  {w:'窃窃私语', py:'qiè qiè sī yǔ', unit:7},
+  {w:'行进', py:'xíng jìn', unit:7},
+  {w:'海参', py:'hǎi shēn', unit:7},
+  {w:'肌肉', py:'jī ròu', unit:7},
+  {w:'伸缩', py:'shēn suō', unit:7},
+  {w:'攻击', py:'gōng jī', unit:7},
+  {w:'反推力', py:'fǎn tuī lì', unit:7},
+  {w:'后退', py:'hòu tuì', unit:7},
+  {w:'轮船', py:'lún chuán', unit:7},
+  {w:'长途', py:'cháng tú', unit:7},
+  {w:'细胞', py:'xì bāo', unit:7},
+  {w:'陆地', py:'lù dì', unit:7},
+  {w:'火烧云', py:'huǒ shāo yún', unit:7},
+  {w:'晚饭', py:'wǎn fàn', unit:7},
+  {w:'笑盈盈', py:'xiào yíng yíng', unit:7},
+  {w:'胡子', py:'hú zi', unit:7},
+  {w:'红彤彤', py:'hóng tōng tōng', unit:7},
+  {w:'金灿灿', py:'jīn càn càn', unit:7},
+  {w:'葡萄', py:'pú tao', unit:7},
+  {w:'脖子', py:'bó zi', unit:7},
+  {w:'凶猛', py:'xiōng měng', unit:7},
+  {w:'威武', py:'wēi wǔ', unit:7},
+  {w:'镇静', py:'zhèn jìng', unit:7},
+  // 第八单元（慢性子裁缝和急性子顾客/漏）
+  {w:'性子', py:'xìng zi', unit:8},
+  {w:'顾客', py:'gù kè', unit:8},
+  {w:'布料', py:'bù liào', unit:8},
+  {w:'交货', py:'jiāo huò', unit:8},
+  {w:'箱子', py:'xiāng zi', unit:8},
+  {w:'笑话', py:'xiào hua', unit:8},
+  {w:'大方', py:'dà fāng', unit:8},
+  {w:'夸奖', py:'kuā jiǎng', unit:8},
+  {w:'实在', py:'shí zài', unit:8},
+  {w:'提前', py:'tí qián', unit:8},
+  {w:'服务', py:'fú wù', unit:8},
+  {w:'袖子', py:'xiù zi', unit:8},
+  {w:'衬衫', py:'chèn shān', unit:8},
+  {w:'负责', py:'fù zé', unit:8},
+  {w:'名声', py:'míng sheng', unit:8},
+  {w:'手艺', py:'shǒu yì', unit:8},
+  {w:'感动', py:'gǎn dòng', unit:8},
+  {w:'里屋', py:'lǐ wū', unit:8},
+  {w:'莫非', py:'mò fēi', unit:8},
+  {w:'厉害', py:'lì hài', unit:8},
+  {w:'走南闯北', py:'zǒu nán chuǎng běi', unit:8},
+  {w:'发抖', py:'fā dǒu', unit:8},
+  {w:'松手', py:'sōng shǒu', unit:8},
+  {w:'跟前', py:'gēn qián', unit:8},
+  {w:'甘心', py:'gān xīn', unit:8},
+  {w:'泄气', py:'xiè qì', unit:8},
+];
+
+function startXie(){
+  game = { qs: shuffle(XIEQ).slice(0,10), i:0, ok:0, res:[], lock:false };
+  $('xieL').classList.add('show');
+  renderXieQ();
+}
+function renderXieQ(){
+  const q = game.qs[game.i];
+  $('xDots').innerHTML = game.qs.map((_,k)=>`<div class="dot ${k<game.i?(game.res[k]?'ok':'bad'):(k===game.i?'cur':'')}"></div>`).join('');
+  $('xUnit').textContent = `第${q.unit}单元 · 听拼音写词语`;
+  $('xPy').textContent = q.py;
+  const wrongPool = [...new Set(XIEQ.filter(x=>x.w!==q.w).map(x=>x.w))];
+  const wrong = shuffle(wrongPool).slice(0,3);
+  const opts = shuffle([q.w, ...wrong]);
+  $('xOpts').innerHTML = opts.map(o=>`<button class="opt" onclick="pickXie(this,'${o}')">${o}</button>`).join('');
+  $('xEx').style.display = 'none';
+  game.ans = q.w; game.qPy = q.py; game.lock = false;
+}
+function pickXie(btn, val){
+  if (game.lock) return; game.lock = true;
+  const right = val === game.ans;
+  game.res[game.i] = right;
+  let html = (right ? '✅ 答对了！' : '💡 正确答案在上面～') + ` 答案：<b style="color:#2b5a8a;">${game.ans}</b>（拼音：<b style="color:#2b5a8a;">${game.qPy}</b>）`;
+  $('xExT').innerHTML = html;
+  $('xEx').style.display = 'block';
+  if (right){ btn.classList.add('right'); game.ok++; beep([784,988]); }
+  else {
+    btn.classList.add('wrong'); beep([330]);
+    [...document.querySelectorAll('#xOpts .opt')].find(b=>b.textContent===game.ans).classList.add('right');
+  }
+}
+function nextXie(){
+  game.i++;
+  if (game.i >= game.qs.length) completeTask(Math.round(game.ok/game.qs.length*100));
+  else renderXieQ();
+}
+
 /* ================= 英语句子排序 ================= */
 let ORDERQ = [
   {cn:'我有一支红色的笔。', words:['I','have','a','red','pen'], punc:'.'},
@@ -1846,6 +2198,11 @@ const REFLECT_PROMPTS = {
     {q1:'诗里哪个字你觉得用得特别好？', q2:'为什么诗人要选这个字？换一个字会有什么不一样？'},
     {q1:'用一句话说说这首诗在讲什么。', q2:'诗人当时大概是什么心情？'},
   ],
+  xie: [
+    {q1:'刚才哪个词语你记得不太牢？', q2:'用这个词语说一句话，再读一遍它的拼音～'},
+    {q1:'有没有哪个词语，它的偏旁能帮你记住意思？', q2:'说说这个偏旁和词语意思有什么关系？'},
+    {q1:'挑一个今天写对的词语。', q2:'这个词语出现在哪篇课文里？讲了什么？'},
+  ],
   order: [
     {q1:'排错的句子里，你发现了什么？', q2:'英语句子的顺序和中文有什么不一样？'},
     {q1:'挑一句你排对的句子。', q2:'换一个词，编一句新句子～'},
@@ -1869,6 +2226,7 @@ function applyCustomBanks(){
     if (Array.isArray(data.air) && data.air.length) AIRQ = data.air;
     if (Array.isArray(data.chinese) && data.chinese.length) CHINESEQ = data.chinese;
     if (Array.isArray(data.poem) && data.poem.length) POEMQ = data.poem;
+    if (Array.isArray(data.xie) && data.xie.length) XIEQ = data.xie;
     if (Array.isArray(data.order) && data.order.length) ORDERQ = data.order;
     if (Array.isArray(data.reinforce) && data.reinforce.length) REINFORCEQ = data.reinforce;
     if (data.reflect && typeof data.reflect === 'object'){
